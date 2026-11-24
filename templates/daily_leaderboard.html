@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Quest Rankings | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .daily-hero {
+            text-align: center;
+            padding: 16px 18px 12px;
+            position: relative;
+        }
+
+        .daily-hero-trophy {
+            font-size: 34px;
+            display: block;
+            margin-bottom: 4px;
+            animation: trophyFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes trophyFloat {
+            0%, 100% { transform: translateY(0px) rotate(-2deg); }
+            50%       { transform: translateY(-5px) rotate(2deg); }
+        }
+
+        .daily-hero h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .daily-hero p {
+            font-size: 13px;
+            color: var(--text-subtle);
+            max-width: 480px;
+            margin: 0 auto 10px;
+        }
+
+        .daily-table-card {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .daily-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .daily-table-header h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .daily-grid-row {
+            display: grid;
+            grid-template-columns: 60px 1.6fr 1fr 1fr 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            min-width: 480px;
+            font-size: 13px;
+            border-radius: var(--radius-sm);
+            transition: background 0.15s ease;
+        }
+
+        .daily-grid-row:last-child {
+            border-bottom: none;
+        }
+
+        .daily-grid-row.heading-row {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-card);
+            background: var(--bg-surface);
+            padding-bottom: 8px;
+            margin-bottom: 2px;
+        }
+
+        .daily-grid-row:hover:not(.heading-row) {
+            background: var(--bg-surface);
+        }
+
+        .daily-grid-row.current-player {
+            background: #fff0f3;
+            border: 1.5px solid var(--coral);
+        }
+
+        .rank-cell {
+            text-align: center;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .username-cell strong {
+            color: var(--text-dark);
+            font-size: 13.5px;
+            font-weight: 700;
+        }
+
+        .you-label {
+            display: inline-block;
+            margin-left: 6px;
+            background: var(--coral);
+            color: #ffffff;
+            font-size: 9.5px;
+            font-weight: 900;
+            padding: 1px 6px;
+            border-radius: var(--radius-pill);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .score-cell {
+            text-align: center;
+            color: #b45309;
+            font-weight: 800;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 14px;
+        }
+
+        .level-cell {
+            text-align: center;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .result-cell {
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 36px 16px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 36px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .empty-state h3 {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 12.5px;
+        }
+
+        .back-nav {
+            text-align: center;
+            padding: 10px;
+        }
+
+        @media (max-width: 700px) {
+            .daily-table-card { padding: 14px 10px; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Daily Standings</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('daily_challenge') }}" class="nav-link-item">🎯 Daily Quest</a></li>
+                    <li><a href="{{ url_for('leaderboard') }}" class="nav-link-item">🏆 Leaderboard</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="daily-hero">
+        <span class="daily-hero-trophy">🏆</span>
+        <h1>DAILY QUEST RANKINGS</h1>
+        <p>
+            Compete against all gladiators in today's daily arena event. Earn top XP and become champion!
+        </p>
+        <span class="game-pill game-pill-gold">📅 {{ challenge_date }}</span>
+    </section>
+
+    <main class="site-page-container site-page-narrow">
+
+        <!-- STAT CARDS -->
+        <section class="stats-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 14px;">
+
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">PARTICIPANTS</div>
+                <div class="stat-value">{{ total_players }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">TOTAL WINNERS</div>
+                <div class="stat-value" style="color: var(--emerald);">{{ total_winners }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">TOP XP SCORE</div>
+                <div class="stat-value" style="color: #b45309;">{{ top_score }}</div>
+            </div>
+
+        </section>
+
+        <!-- STANDINGS TABLE -->
+        <section class="daily-table-card">
+
+            <div class="daily-table-header">
+                <h2>🥇 Today's Standings</h2>
+                <span class="game-pill game-pill-gold">TOP 50 GLADIATORS</span>
+            </div>
+
+            <!-- HEADING ROW -->
+            <div class="daily-grid-row heading-row">
+                <div style="text-align: center;">Rank</div>
+                <div>Player</div>
+                <div style="text-align: center;">Result</div>
+                <div style="text-align: center;">XP Earned</div>
+                <div style="text-align: center;">Level</div>
+            </div>
+
+            {% for player in players %}
+
+            <div class="daily-grid-row {% if player['player_id'] == current_player %}current-player{% endif %}">
+
+                <!-- RANK -->
+                <div class="rank-cell">
+                    {% if loop.index == 1 %}
+                        <span style="font-size: 20px;">🥇</span>
+                    {% elif loop.index == 2 %}
+                        <span style="font-size: 19px;">🥈</span>
+                    {% elif loop.index == 3 %}
+                        <span style="font-size: 18px;">🥉</span>
+                    {% else %}
+                        <span style="color: var(--text-muted); font-size: 13px; font-weight: 800;">#{{ loop.index }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- USERNAME -->
+                <div class="username-cell">
+                    <strong>{{ player['username'] }}</strong>
+                    {% if player['player_id'] == current_player %}
+                        <span class="you-label">YOU</span>
+                    {% endif %}
+                </div>
+
+                <!-- RESULT -->
+                <div class="result-cell">
+                    {% if player['result'] == 'Win' %}
+                        <span class="game-pill game-pill-emerald">✓ WIN</span>
+                    {% else %}
+                        <span class="game-pill game-pill-coral">✕ LOSS</span>
+                    {% endif %}
+                </div>
+
+                <!-- XP SCORE -->
+                <div class="score-cell">⭐ {{ player['score'] }}</div>
+
+                <!-- LEVEL -->
+                <div class="level-cell">Lv. {{ player['level'] }}</div>
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+                <span class="empty-icon">🎯</span>
+                <h3>No Participants Today Yet</h3>
+                <p>Be the very first gladiator to complete today's daily quest!</p>
+            </div>
+
+            {% endfor %}
+
+        </section>
+
+        <!-- BACK LINK -->
+        <div class="back-nav">
+            <a href="{{ url_for('daily_challenge') }}" class="play-btn play-btn-primary" style="padding: 9px 18px; font-size: 13px;">
+                🎯 Today's Daily Challenge →
+            </a>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 24px;">
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase;">
+            Hangman Arena &bull; Daily Quest Champions
+        </div>
+    </footer>
+
+</body>
+</html>

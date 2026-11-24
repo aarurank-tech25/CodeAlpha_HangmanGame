@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Quest | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .daily-rules-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 14px 0 18px;
+        }
+        .daily-rule-box {
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .daily-rule-box strong {
+            display: block;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 2px;
+        }
+        .daily-rule-box span {
+            color: var(--text-muted);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        @media (max-width: 650px) {
+            .daily-rules-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Daily Quest</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                    <li><a href="{{ url_for('daily_leaderboard.daily_leaderboard') }}" class="nav-link-item">📅 Daily Rankings</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow" style="max-width: 900px;">
+
+        <!-- DAILY QUEST HERO BANNER -->
+        <section class="arena-card hero" style="text-align: center; margin-bottom: 14px; background: var(--bg-surface); border-color: var(--border-gold); padding: 18px 20px;">
+            <div style="font-size: 34px; margin-bottom: 4px; display: inline-block;">🎯</div>
+            <h1 style="font-size: 1.35rem; margin-bottom: 4px; color: var(--primary);">DAILY WORD QUEST</h1>
+            <p style="color: var(--text-subtle); font-size: 13px; max-width: 440px; margin: 0 auto;">
+                One secret word per day, shared with all gladiators worldwide.
+            </p>
+            <div class="game-pill game-pill-gold date-pill" style="margin-top: 8px;">
+                📅 {{ challenge_date }}
+            </div>
+        </section>
+
+        <!-- CHALLENGE CARD -->
+        <section class="arena-card challenge-card" style="text-align: center; padding: 20px 22px;">
+            <h2 style="font-size: 1.15rem; margin-bottom: 4px; color: var(--primary);">📅 Today's Arena Quest</h2>
+
+            <p style="color: var(--text-subtle); font-size: 13px; margin: 4px auto 12px; max-width: 460px;">
+                Solve today's secret word in fewer guesses to earn maximum XP and climb the daily leaderboard!
+            </p>
+
+            <div class="daily-rules-row rules">
+                <div class="daily-rule-box rule">
+                    <strong>MEDIUM</strong>
+                    <span>Difficulty</span>
+                </div>
+                <div class="daily-rule-box rule">
+                    <strong style="color: #b45309;">45 SEC</strong>
+                    <span>Countdown</span>
+                </div>
+                <div class="daily-rule-box rule">
+                    <strong style="color: var(--coral);">6</strong>
+                    <span>Lives Allowed</span>
+                </div>
+            </div>
+
+            {% if played_today %}
+                {% if daily_result == 'Win' %}
+                    <div style="background: #e6f9f0; border: 1.5px solid var(--emerald); border-radius: var(--radius-md); padding: 18px;" class="completed">
+                        <h3 style="color: var(--emerald); font-size: 1.15rem; margin-bottom: 4px;">🎉 Quest Completed!</h3>
+                        <p style="color: var(--text-dark); font-size: 13.5px;">You solved today's secret word successfully!</p>
+                        <p style="font-family: 'Fredoka', sans-serif; font-size: 1.5rem; font-weight: 700; color: #b45309; margin: 8px 0;">
+                            +{{ daily_score }} XP EARNED
+                        </p>
+                        <p style="color: var(--text-subtle); font-size: 12px;">Come back tomorrow for the next challenge!</p>
+                    </div>
+                {% else %}
+                    <div style="background: #fff0f3; border: 1.5px solid var(--coral); border-radius: var(--radius-md); padding: 18px;" class="completed loss-message">
+                        <h3 style="color: var(--coral); font-size: 1.15rem; margin-bottom: 4px;">💔 Quest Finished</h3>
+                        <p style="color: var(--text-dark); font-size: 13.5px;">Today's attempt has concluded.</p>
+                        <p style="color: var(--text-subtle); font-size: 12px; margin-top: 4px;">
+                            Return tomorrow for a fresh word and a chance to redeem yourself!
+                        </p>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div style="margin-top: 10px;">
+                    <a
+                        href="{{ url_for('game', difficulty='medium', daily=1) }}"
+                        class="play-btn play-btn-gold btn-block start-btn"
+                        style="padding: 12px 20px; font-size: 15px;"
+                    >
+                        🎯 START DAILY QUEST →
+                    </a>
+                </div>
+
+                <p style="color: var(--text-muted); font-size: 11.5px; margin-top: 10px;" class="note">
+                    One attempt per day. Your result will appear on the daily leaderboard.
+                </p>
+            {% endif %}
+        </section>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 24px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • DAILY GLOBAL WORD CHALLENGE
+        </div>
+    </footer>
+</body>
+</html>

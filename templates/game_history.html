@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Archives | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .history-grid-row {
+            display: grid;
+            grid-template-columns: 60px 1.6fr 1fr 1fr 1.4fr;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            min-width: 480px;
+            font-size: 13.5px;
+            transition: background 0.15s ease;
+        }
+        .history-grid-row:last-child { border-bottom: none; }
+        .history-grid-row.heading-row {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-card);
+            background: var(--bg-surface);
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+        }
+        .history-grid-row:hover:not(.heading-row) {
+            background: var(--bg-surface);
+        }
+    </style>
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Match History</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow">
+
+        <section class="section-headline-block">
+            <span class="game-pill game-pill-violet" style="margin-bottom: 6px;">MATCH ARCHIVES</span>
+            <h1>GAME HISTORY</h1>
+            <p>Review your match results, see past words, and track how much XP you've earned over time.</p>
+        </section>
+
+        <!-- STATS HUD -->
+        <section class="stats-grid stats" style="margin-bottom: 14px;">
+            <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-label">TOTAL GAMES</div>
+                <div class="stat-value">{{ total_games }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">TOTAL WINS</div>
+                <div class="stat-value" style="color: var(--emerald);">{{ total_wins }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-label">TOTAL LOSSES</div>
+                <div class="stat-value" style="color: var(--crimson);">{{ total_losses }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">XP EARNED</div>
+                <div class="stat-value" style="color: #b45309;">{{ total_xp }}</div>
+            </div>
+        </section>
+
+        <!-- MATCHES TABLE -->
+        <section class="arena-card history-card" style="padding: 16px 18px; overflow-x: auto;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 style="font-size: 1.05rem; color: var(--primary);">📋 Recent Match Records</h2>
+                <span class="game-pill game-pill-gold">LATEST 50 GAMES</span>
+            </div>
+
+            <div class="history-grid-row heading-row game-row heading">
+                <div style="text-align: center;">ID</div>
+                <div>WORD</div>
+                <div style="text-align: center;">RESULT</div>
+                <div style="text-align: center;">XP EARNED</div>
+                <div style="text-align: center;">DATE PLAYED</div>
+            </div>
+
+            {% for game in games %}
+            <div class="history-grid-row game-row">
+                <div style="text-align: center; color: var(--text-muted); font-size: 12.5px;">#{{ game['id'] }}</div>
+
+                <div style="font-family: 'Fredoka', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1.2px; color: var(--text-dark);" class="word">
+                    {{ game['word'] }}
+                </div>
+
+                <div style="text-align: center;">
+                    {% if game['result'] == 'Win' %}
+                        <span class="game-pill game-pill-emerald status win">✓ WIN</span>
+                    {% else %}
+                        <span class="game-pill game-pill-coral status loss">✕ LOSS</span>
+                    {% endif %}
+                </div>
+
+                <div style="text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 14px; color: #b45309;" class="xp">
+                    +{{ game['score'] }} XP
+                </div>
+
+                <div style="text-align: center; color: var(--text-muted); font-size: 11.5px;" class="date">
+                    {{ game['played_at'] }}
+                </div>
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 36px 16px; color: var(--text-muted);" class="empty">
+                <div style="font-size: 36px; margin-bottom: 8px;">🎮</div>
+                <h3 style="color: var(--primary); font-size: 16px; margin-bottom: 4px;">No Matches Logged Yet</h3>
+                <p style="font-size: 13px;">Play your first game to start building your match history!</p>
+            </div>
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • MATCH LOGS &amp; HISTORY
+        </div>
+    </footer>
+</body>
+</html>

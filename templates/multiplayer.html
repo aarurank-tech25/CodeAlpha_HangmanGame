@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1v1 Duel Matchmaker | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .duel-creation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .duel-room-card {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 20px 18px;
+            box-shadow: var(--shadow-card);
+            transition: all var(--ease-bounce) 0.2s;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .duel-room-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .duel-room-card.host-side::before { background: var(--primary); }
+        .duel-room-card.join-side::before { background: var(--coral); }
+
+        .duel-room-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .duel-code-input {
+            width: 100%;
+            padding: 9px 12px;
+            margin-bottom: 12px;
+            background: #ffffff;
+            color: var(--text-dark);
+            border: 2px dashed var(--coral);
+            border-radius: var(--radius-md);
+            outline: none;
+            text-align: center;
+            font-family: 'Fredoka', monospace;
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            transition: all 0.16s ease;
+        }
+
+        .duel-code-input:focus {
+            border-color: var(--coral);
+            border-style: solid;
+            box-shadow: 0 0 0 3px rgba(255, 71, 126, 0.18);
+        }
+
+        .live-room-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .live-room-row:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 800px) {
+            .duel-creation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">1v1 PvP Duels</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu nav-links">
+                    <li><a href="{{ url_for('multiplayer_ranking.leaderboard') }}" class="nav-link-item">🏆 Duel Rankings</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container">
+
+        <section class="section-headline-block hero" style="margin-bottom: 14px;">
+            <div style="font-size: 32px; margin-bottom: 4px; display: inline-block;" class="hero-icon">
+                👥
+            </div>
+            <h1>1v1 MULTIPLAYER DUEL ARENA</h1>
+            <p>
+                Challenge friends or rivals to live, turn-based word combat. Take turns guessing letters and outthink your opponent!
+            </p>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% for message in messages %}
+                <div style="margin-bottom: 14px; padding: 10px 14px; border-radius: var(--radius-md); background: #e6f9f0; border: 1.5px solid var(--emerald); color: var(--emerald); font-weight: 700; font-size: 13px;" class="flash-message">
+                    <span>✓ {{ message }}</span>
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <!-- DUAL CREATE / JOIN CARDS -->
+        <section class="duel-creation-grid cards">
+
+            <!-- HOST ROOM -->
+            <div class="duel-room-card host-side card">
+                <div>
+                    <div style="font-size: 28px; margin-bottom: 6px;" class="card-icon">⚔️</div>
+                    <h2 style="font-size: 1.1rem; margin-bottom: 4px; color: var(--primary);">Create a Duel Room</h2>
+                    <p style="color: var(--text-subtle); font-size: 13px; line-height: 1.45; margin-bottom: 14px;">
+                        Generate an invite code and share it with a friend to start a private 1v1 word duel.
+                    </p>
+                </div>
+
+                <form method="POST" action="{{ url_for('multiplayer.create_room') }}">
+                    <button type="submit" class="play-btn play-btn-primary btn-block" style="padding: 10px 16px; font-size: 13px;">
+                        + CREATE PRIVATE ROOM
+                    </button>
+                </form>
+            </div>
+
+            <!-- JOIN ROOM -->
+            <div class="duel-room-card join-side card">
+                <div>
+                    <div style="font-size: 28px; margin-bottom: 6px;" class="card-icon">🤝</div>
+                    <h2 style="font-size: 1.1rem; margin-bottom: 4px; color: var(--coral);">Join with Code</h2>
+                    <p style="color: var(--text-subtle); font-size: 13px; line-height: 1.45; margin-bottom: 10px;">
+                        Got a 6-character room code from your friend? Enter it below to join the match!
+                    </p>
+                </div>
+
+                <form method="POST" action="{{ url_for('multiplayer.join_room') }}">
+                    <input
+                        type="text"
+                        name="room_code"
+                        class="duel-code-input code-input"
+                        placeholder="ROOM CODE"
+                        maxlength="6"
+                        minlength="6"
+                        pattern="[A-Za-z0-9]{6}"
+                        required
+                        autocomplete="off"
+                    >
+
+                    <button type="submit" class="play-btn play-btn-coral btn-block" style="padding: 10px 16px; font-size: 13px;">
+                        JOIN DUEL ROOM →
+                    </button>
+                </form>
+            </div>
+
+        </section>
+
+        <!-- MULTIPLAYER STANDINGS BANNER -->
+        <section class="arena-card ranking-card" style="margin-bottom: 18px; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="font-size: 30px;" class="card-icon">👑</div>
+                <div>
+                    <h2 style="font-size: 1.05rem; margin-bottom: 2px; color: var(--primary);">1v1 Duel Leaderboard</h2>
+                    <p style="color: var(--text-subtle); margin: 0; font-size: 12.5px;">
+                        Check out the top duelists with the most victories and highest multiplayer XP.
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('multiplayer_ranking.leaderboard') }}" class="play-btn play-btn-gold" style="padding: 8px 16px; font-size: 13px;">
+                VIEW DUEL RANKINGS →
+            </a>
+        </section>
+
+        <!-- ACTIVE MY ROOMS -->
+        <section class="arena-card rooms-card" style="padding: 16px 18px;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 style="font-size: 1.05rem; color: var(--primary);">📋 Your Matchmaking Rooms</h2>
+                <span class="game-pill game-pill-coral">LIVE ROOMS</span>
+            </div>
+
+            {% for room in rooms %}
+
+                <div class="live-room-row room-row">
+
+                    <div>
+                        <div style="font-family: 'Fredoka', monospace; font-size: 17px; font-weight: 700; letter-spacing: 2px; color: var(--primary);" class="room-code">
+                            ⚔ {{ room['room_code'] }}
+                        </div>
+
+                        <div style="color: var(--text-subtle); font-size: 12.5px; margin-top: 2px;" class="room-info">
+                            Host: <strong style="color: var(--text-dark);">{{ room['host_username'] }}</strong>
+                            {% if room['guest_username'] %}
+                                &nbsp;•&nbsp; Opponent: <strong style="color: var(--coral);">{{ room['guest_username'] }}</strong>
+                            {% else %}
+                                &nbsp;•&nbsp; <span style="color: #b45309; font-weight: 700;">Waiting for opponent...</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="game-pill {% if room['status'] == 'playing' %}game-pill-emerald{% else %}game-pill-gold{% endif %}">
+                            {{ room['status'] | upper }}
+                        </span>
+
+                        <a href="{{ url_for('multiplayer.room', room_code=room['room_code']) }}" class="play-btn play-btn-primary" style="padding: 7px 14px; font-size: 12px;">
+                            ENTER ROOM →
+                        </a>
+                    </div>
+
+                </div>
+
+            {% else %}
+
+                <div style="text-align: center; padding: 24px 16px; color: var(--text-muted);" class="empty">
+                    <div style="font-size: 32px; margin-bottom: 6px;">🎮</div>
+                    <h3 style="color: var(--primary); font-size: 15px; margin-bottom: 2px;">No Active Duel Rooms</h3>
+                    <p style="font-size: 12.5px;">Create a room above and share the room code with a friend to start playing!</p>
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • 1v1 DUEL COMBAT
+        </div>
+    </footer>
+
+</body>
+</html>

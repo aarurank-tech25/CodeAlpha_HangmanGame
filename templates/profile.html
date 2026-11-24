@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Profile | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .profile-hero-card {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 18px 22px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-card);
+            position: relative;
+            overflow: hidden;
+        }
+        .profile-hero-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), var(--coral), var(--primary));
+        }
+        .profile-avatar {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--coral), var(--primary));
+            border: 2.5px solid var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 3px 0 var(--coral-3d);
+            flex-shrink: 0;
+            color: #ffffff;
+        }
+        .profile-grid-row {
+            display: grid;
+            grid-template-columns: 60px 1.6fr 1fr 1fr 1.4fr;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            min-width: 480px;
+            font-size: 13px;
+            transition: background 0.15s ease;
+        }
+        .profile-grid-row:last-child { border-bottom: none; }
+        .profile-grid-row.heading-row {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-card);
+            background: var(--bg-surface);
+            border-radius: var(--radius-sm);
+            padding: 7px 14px;
+        }
+        .profile-grid-row:hover:not(.heading-row) {
+            background: var(--bg-surface);
+        }
+        @media (max-width: 700px) {
+            .profile-hero-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Player Profile</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links-menu nav-links">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                    <li><a href="{{ url_for('leaderboard') }}" class="nav-link-item">🏆 Leaderboard</a></li>
+                    <li><a href="{{ url_for('achievements') }}" class="nav-link-item">🏅 Badges</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow">
+
+        <!-- PROFILE IDENTITY -->
+        <section class="profile-hero-card profile-hero">
+            <div class="profile-avatar avatar">👤</div>
+            <div class="profile-sheet-meta profile-info">
+                <h1 style="font-size: 1.35rem; margin-bottom: 2px; color: var(--primary);">{{ player['username'] }}</h1>
+                <p style="color: var(--text-subtle); font-size: 12.5px; margin-bottom: 6px;">
+                    Word Gladiator • Player ID #{{ player['id'] }}
+                </p>
+                <span class="game-pill game-pill-gold level-pill">
+                    ⚡ ARENA LEVEL {{ player['level'] }}
+                </span>
+            </div>
+        </section>
+
+        <!-- STATISTICS HUD -->
+        <section class="stats-grid stats-grid-layout" style="margin-bottom: 14px;">
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">TOTAL XP</div>
+                <div class="stat-value" style="color: #b45309;">{{ player['xp'] }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-label">GAMES PLAYED</div>
+                <div class="stat-value">{{ total_games }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">VICTORIES</div>
+                <div class="stat-value" style="color: var(--emerald);">{{ total_wins }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-label">WIN RATE</div>
+                <div class="stat-value" style="color: var(--coral);">{{ win_rate }}%</div>
+            </div>
+        </section>
+
+        <!-- TROPHY CABINET PREVIEW -->
+        <section class="arena-card content-card" style="margin-bottom: 16px; padding: 16px 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;" class="section-heading">
+                <h2 style="font-size: 1.05rem; color: var(--primary);">🏅 Unlocked Trophies</h2>
+                <a href="{{ url_for('achievements') }}" class="game-pill game-pill-gold">VIEW ALL →</a>
+            </div>
+
+            {% if unlocked_badges %}
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;" class="badges-grid">
+                    {% for badge in unlocked_badges %}
+                        <div style="background: var(--bg-surface); border: 1.5px solid var(--border-card); border-radius: var(--radius-md); padding: 12px 10px; text-align: center;" class="badge-card">
+                            <div style="font-size: 24px; margin-bottom: 4px;" class="badge-icon">{{ badge['icon'] }}</div>
+                            <h3 style="font-size: 13px; color: var(--text-dark); margin-bottom: 2px;">{{ badge['name'] }}</h3>
+                            <p style="font-size: 11px; color: var(--text-subtle);">{{ badge['description'] }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 24px 14px; color: var(--text-muted);" class="empty-badges">
+                    <div style="font-size: 32px; margin-bottom: 6px;">🎯</div>
+                    <h3 style="color: var(--primary); font-size: 15px;">No Trophies Unlocked Yet</h3>
+                    <p style="font-size: 12.5px;">Win matches to unlock your first trophy badge!</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- RECENT GAMES TABLE -->
+        <section class="arena-card content-card" style="padding: 16px 18px; overflow-x: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;" class="section-heading">
+                <h2 style="font-size: 1.05rem; color: var(--primary);">📜 Recent Battles</h2>
+                <a href="{{ url_for('game_history') }}" class="game-pill game-pill-violet">FULL HISTORY →</a>
+            </div>
+
+            <div class="profile-grid-row heading-row game-row game-heading">
+                <div style="text-align: center;">ID</div>
+                <div>WORD</div>
+                <div style="text-align: center;">RESULT</div>
+                <div style="text-align: center;">SCORE</div>
+                <div style="text-align: center;">DATE</div>
+            </div>
+
+            {% for game in recent_games %}
+                <div class="profile-grid-row game-row">
+                    <div style="text-align: center; color: var(--text-muted); font-size: 12px;">#{{ game['id'] }}</div>
+                    <div style="font-weight: 700; color: var(--text-dark); letter-spacing: 0.8px;" class="game-word">{{ game['word'] }}</div>
+                    <div style="text-align: center;">
+                        {% if game['result'] == 'Win' %}
+                            <span class="game-pill game-pill-emerald game-status win">✓ WIN</span>
+                        {% else %}
+                            <span class="game-pill game-pill-coral game-status loss">✕ LOSS</span>
+                        {% endif %}
+                    </div>
+                    <div style="text-align: center; color: #b45309; font-weight: 700;" class="game-score">{{ game['score'] }} XP</div>
+                    <div style="text-align: center; color: var(--text-muted); font-size: 11.5px;" class="game-date">{{ game['played_at'] }}</div>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 24px 14px; color: var(--text-muted);" class="empty-games">
+                    <div style="font-size: 32px; margin-bottom: 6px;">🎮</div>
+                    <h3 style="color: var(--primary); font-size: 15px;">No battles recorded</h3>
+                    <p style="font-size: 12.5px;">Enter the arena to record your first game!</p>
+                </div>
+            {% endfor %}
+        </section>
+
+    </main>
+
+    <footer class="site-footer profile-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • PLAYER PROFILE &amp; DOSSIER
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Leaderboard | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .leaderboard-grid-row {
+            display: grid;
+            grid-template-columns: 60px 1.8fr 1.1fr 0.9fr 0.9fr;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            min-width: 480px;
+            font-size: 13.5px;
+            transition: background 0.15s ease;
+        }
+        .leaderboard-grid-row:last-child { border-bottom: none; }
+        .leaderboard-grid-row.heading-row {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-card);
+            background: var(--bg-surface);
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+        }
+        .leaderboard-grid-row:hover:not(.heading-row) {
+            background: var(--bg-surface);
+        }
+        .leaderboard-grid-row.current-player {
+            background: #fff0f3;
+            border: 1.5px solid var(--coral);
+            border-radius: var(--radius-sm);
+        }
+        .champion-banner {
+            text-align: center;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Global Standings</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow">
+
+        <section class="champion-banner champion-card">
+            <div style="font-size: 32px; margin-bottom: 4px;">👑</div>
+            <h1 style="font-size: 1.35rem; margin-bottom: 4px; color: var(--primary);">GLOBAL LEADERBOARD</h1>
+            <p style="color: var(--text-subtle); font-size: 13px; max-width: 480px; margin: 0 auto;">
+                Top 20 gladiators ranked by lifetime earned XP. Win battles, level up, and conquer the arena!
+            </p>
+        </section>
+
+        <section class="arena-card table-card" style="padding: 16px 18px; overflow-x: auto;">
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 6px; color: var(--primary);">
+                    🏅 Hall of Champions
+                </h2>
+                <span class="game-pill game-pill-gold">TOP 20 RANKS</span>
+            </div>
+
+            <div class="leaderboard-grid-row heading-row player-row heading">
+                <div style="text-align: center;">Rank</div>
+                <div>Player</div>
+                <div style="text-align: center;">Total XP</div>
+                <div style="text-align: center;">Level</div>
+                <div style="text-align: center;">Wins</div>
+            </div>
+
+            {% for player in players %}
+            <div class="leaderboard-grid-row player-row {% if player['id'] == current_player %}current-player{% endif %}">
+
+                <div style="text-align: center; font-size: 16px; font-weight: 800;" class="rank">
+                    {% if loop.index == 1 %}🥇
+                    {% elif loop.index == 2 %}🥈
+                    {% elif loop.index == 3 %}🥉
+                    {% else %}<span style="color: var(--text-muted); font-size: 13px;">#{{ loop.index }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="player-name">
+                    <strong style="color: var(--text-dark); font-size: 14px;">{{ player['username'] }}</strong>
+                    {% if player['id'] == current_player %}
+                        <span style="display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 900; background: var(--coral); color: #fff; padding: 1px 6px; border-radius: var(--radius-pill); letter-spacing: 0.5px;">YOU</span>
+                    {% endif %}
+                </div>
+
+                <div style="text-align: center; color: #b45309; font-weight: 800;" class="value">
+                    ⭐ {{ player['xp'] }} XP
+                </div>
+
+                <div style="text-align: center; color: var(--primary); font-weight: 700;" class="value">
+                    Lv. {{ player['level'] }}
+                </div>
+
+                <div style="text-align: center; color: var(--emerald); font-weight: 800;" class="value">
+                    {{ player['total_wins'] }}
+                </div>
+
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 36px 16px; color: var(--text-muted);" class="empty">
+                <div style="font-size: 36px; margin-bottom: 8px;">🎮</div>
+                <h3 style="color: var(--primary); font-size: 16px; margin-bottom: 4px;">No Ranked Players Yet</h3>
+                <p style="font-size: 13px;">Play your first game to appear on the leaderboard!</p>
+            </div>
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • GLOBAL PLAYER RANKINGS
+        </div>
+    </footer>
+</body>
+</html>

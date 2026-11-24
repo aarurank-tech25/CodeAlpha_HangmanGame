@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1v1 Duel Rankings | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .mp-podium-banner {
+            text-align: center;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            background: var(--bg-surface);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            position: relative;
+        }
+
+        .mp-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .player-status-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 18px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-lg);
+            background: #fff8eb;
+            border: 1.5px solid var(--border-gold);
+            box-shadow: var(--shadow-card);
+            flex-wrap: wrap;
+        }
+
+        .player-status-meta h2 {
+            font-size: 1.05rem;
+            margin-bottom: 2px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .player-status-meta p {
+            font-size: 12.5px;
+            color: var(--text-subtle);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rank-badge-large {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 30px;
+            font-weight: 700;
+            color: #b45309;
+            line-height: 1;
+        }
+
+        .mp-table-card {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+            overflow-x: auto;
+        }
+
+        .mp-leaderboard-grid {
+            display: grid;
+            grid-template-columns: 60px 1.6fr 0.9fr 0.9fr 0.9fr 1.1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            min-width: 480px;
+            font-size: 13px;
+            transition: background 0.15s ease;
+        }
+
+        .mp-leaderboard-grid:last-child {
+            border-bottom: none;
+        }
+
+        .mp-leaderboard-grid.heading-row {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-card);
+            background: var(--bg-surface);
+            border-radius: var(--radius-sm);
+            padding: 7px 14px;
+        }
+
+        .mp-leaderboard-grid:hover:not(.heading-row) {
+            background: var(--bg-surface);
+        }
+
+        .mp-leaderboard-grid.current-player {
+            background: #fff0f3;
+            border: 1.5px solid var(--coral);
+            border-radius: var(--radius-sm);
+        }
+
+        @media (max-width: 768px) {
+            .mp-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .player-status-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">1v1 Duel Rankings</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu nav-links">
+                    <li><a href="{{ url_for('multiplayer.lobby') }}" class="nav-link-item">👥 Duel Lobby</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow">
+
+        <section class="mp-podium-banner hero champion-card">
+            <div style="font-size: 32px; margin-bottom: 4px; display: inline-block;" class="hero-icon crown">
+                🏆
+            </div>
+            <h1 style="font-size: 1.35rem; margin-bottom: 4px; color: var(--primary);">MULTIPLAYER DUEL CHAMPIONS</h1>
+            <p style="color: var(--text-subtle); font-size: 13px; max-width: 520px; margin: 0 auto;">
+                Compete in real-time 1v1 multiplayer duels. Outguess arena rivals, score victories, and claim your crown!
+            </p>
+        </section>
+
+        <!-- STATS HUD -->
+        <section class="mp-stats-grid stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-label">RANKED DUELISTS</div>
+                <div class="stat-value">{{ total_players }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-label">COMPLETED DUELS</div>
+                <div class="stat-value" style="color: var(--primary);">{{ total_matches }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🥇</div>
+                <div class="stat-label">TOP DUELIST WINS</div>
+                <div class="stat-value" style="color: #b45309;">{{ top_wins }}</div>
+            </div>
+        </section>
+
+        <!-- PLAYER PERSONAL PERFORMANCE BANNER -->
+        <section class="player-status-banner your-ranking">
+            <div class="player-status-meta">
+                <h2>👤 Your Multiplayer Performance</h2>
+                <p>
+                    <span>Victories: <strong style="color: var(--emerald);">{{ current_player_wins }}</strong></span>
+                    <span>•</span>
+                    <span>Matches: <strong style="color: var(--primary);">{{ current_player_matches }}</strong></span>
+                    <span>•</span>
+                    <span>Multiplayer XP: <strong style="color: #b45309;">{{ current_player_xp }}</strong></span>
+                </p>
+            </div>
+
+            <div class="rank-badge-large rank-number">
+                {% if current_player_rank %}
+                    #{{ current_player_rank }}
+                {% else %}
+                    —
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- RANKINGS TABLE -->
+        <section class="mp-table-card table-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h2 style="font-size: 1.05rem; display: flex; align-items: center; gap: 6px; color: var(--primary);">
+                    🥇 Global Duelist Standings
+                </h2>
+                <span class="game-pill game-pill-gold">TOP 50 PLAYERS</span>
+            </div>
+
+            <div class="mp-leaderboard-grid heading-row player-row heading">
+                <div style="text-align: center;">Rank</div>
+                <div>Duelist</div>
+                <div style="text-align: center;">Matches</div>
+                <div style="text-align: center;">Wins</div>
+                <div style="text-align: center;">Level</div>
+                <div style="text-align: center;">Duel XP</div>
+            </div>
+
+            {% for player in players %}
+                <div class="mp-leaderboard-grid player-row
+                    {% if player['player_id'] == current_player %}
+                        current-player
+                    {% endif %}
+                ">
+                    <div style="text-align: center; font-weight: 800; font-size: 15px;" class="rank">
+                        {% if loop.index == 1 %}
+                            🥇
+                        {% elif loop.index == 2 %}
+                            🥈
+                        {% elif loop.index == 3 %}
+                            🥉
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 13px;">#{{ loop.index }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div style="font-weight: 700; color: var(--text-dark);" class="username">
+                        {{ player['username'] }}
+
+                        {% if player['player_id'] == current_player %}
+                            <span style="display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 900; background: var(--coral); color: #ffffff; padding: 1px 6px; border-radius: var(--radius-pill); letter-spacing: 0.5px;">
+                                YOU
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div style="text-align: center; color: var(--text-dark); font-weight: 700;" class="value">
+                        {{ player['matches_played'] }}
+                    </div>
+
+                    <div style="text-align: center; color: var(--emerald); font-weight: 800;" class="value">
+                        {{ player['multiplayer_wins'] }}
+                    </div>
+
+                    <div style="text-align: center; color: var(--primary); font-weight: 700;" class="value">
+                        Lv. {{ player['level'] }}
+                    </div>
+
+                    <div style="text-align: center; color: #b45309; font-family: 'Fredoka', sans-serif; font-weight: 800;" class="value xp">
+                        ⭐ {{ player['multiplayer_xp'] }}
+                    </div>
+                </div>
+
+            {% else %}
+
+                <div style="text-align: center; padding: 36px 16px; color: var(--text-muted);" class="empty">
+                    <div style="font-size: 36px; margin-bottom: 8px;">🎮</div>
+                    <h3 style="color: var(--primary); font-size: 16px; margin-bottom: 4px;">No Multiplayer Champions Yet</h3>
+                    <p style="font-size: 13px;">Enter the 1v1 lobby and complete a match to make your debut on the global leaderboard!</p>
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • 1V1 DUEL CHAMPIONS
+        </div>
+    </footer>
+
+</body>
+</html>

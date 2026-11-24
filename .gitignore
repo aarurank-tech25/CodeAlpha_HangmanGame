@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.db
+*.sqlite
+*.sqlite3
+instance/
+.DS_Store
+Thumbs.db
+# Local backup and debugging files
+*_backup.py
+templates/*_backup.html
+capture_*.py
+test_game_capture.py
+inspect_*.png

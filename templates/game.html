@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangman Arena | Game Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+
+    <style>
+        /* ═══════════════════════════════════════════════════════
+           GAME ARENA — COMMERCIAL CASUAL GAMING STADIUM
+           Optimized for 100% Zoom (1366x768 to 1920x1080)
+           ═══════════════════════════════════════════════════════ */
+
+        .game-page-wrap {
+            width: calc(100% - 48px);
+            max-width: 1200px;
+            margin-inline: auto;
+            padding: 24px 0 40px;
+            position: relative;
+            flex: 1 0 auto;
+        }
+
+        /* ── MAIN STADIUM BOARD ───────────────────────────────── */
+        .arena-stadium-board {
+            background: #ffffff;
+            border: 1.5px solid var(--border-medium);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-card);
+            padding: 22px 26px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .arena-stadium-board::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--coral), var(--primary), var(--gold));
+        }
+
+        /* ── COMBAT HUD STRIP ─────────────────────────────────── */
+        .game-hud-strip {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 14px;
+            background: #f4effc;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+        }
+
+        .hud-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hud-center { text-align: center; }
+
+        .hud-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hud-lives-block {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--peach);
+            border: 1px solid var(--border-coral);
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+        }
+
+        .hud-lives-label {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .hud-lives-val {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--coral-dark);
+        }
+
+        /* Timer badge */
+        .hud-timer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 14px;
+            border-radius: var(--radius-pill);
+            background: var(--amber-soft);
+            border: 1px solid #fcd34d;
+            box-shadow: 0 1px 4px rgba(245, 158, 11, 0.12);
+            transition: all 0.3s ease;
+        }
+
+        .hud-timer-badge.warning {
+            background: #fff1f4;
+            border-color: #ff8aa3;
+            animation: timerPulse 0.65s ease infinite alternate;
+        }
+
+        @keyframes timerPulse {
+            from { transform: scale(1); }
+            to   { transform: scale(1.04); }
+        }
+
+        .hud-timer-badge .timer-icon { font-size: 14px; }
+
+        .hud-timer-badge strong {
+            font-family: 'Fredoka', 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: #92400e;
+            letter-spacing: 0.5px;
+            min-width: 26px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .hud-timer-badge.warning strong {
+            color: var(--coral-dark);
+        }
+
+        .hud-timer-badge .timer-sec {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: #92400e;
+            text-transform: uppercase;
+        }
+
+        .hud-wrong-block {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: #ffffff;
+            border: 1px solid var(--border-medium);
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+        }
+
+        .hud-wrong-label {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .hud-wrong-val {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: var(--coral-dark);
+        }
+
+        /* ── 2-COLUMN FIELD ───────────────────────────────────── */
+        .stadium-field {
+            display: grid;
+            grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.25fr);
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        /* ── LEFT: GALLOWS STAGE ──────────────────────────────── */
+        .gallows-stage {
+            background: #f8f5fe;
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 16px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 330px;
+            max-height: 380px;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stage-label {
+            position: absolute;
+            top: 10px;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .hangman-svg {
+            width: 100%;
+            max-width: 240px;
+            height: 240px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .gallows-line {
+            stroke: #341a6e;
+            stroke-width: 4.5;
+            stroke-linecap: round;
+            fill: none;
+        }
+
+        .body-part {
+            stroke: var(--coral);
+            stroke-width: 4;
+            stroke-linecap: round;
+            fill: none;
+            animation: partReveal 0.3s var(--ease-bounce) both;
+        }
+
+        @keyframes partReveal {
+            from { opacity: 0; transform-origin: 155px 55px; transform: scale(1.1); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .strikes-counter {
+            position: absolute;
+            bottom: 10px;
+            font-size: 10.5px;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        /* ── RIGHT: WORD DECK & KEYBOARD ─────────────────────── */
+        .combat-deck {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .deck-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Word display */
+        .word-slot-box {
+            background: #341a6e;
+            border-radius: var(--radius-md);
+            padding: 12px 10px;
+            text-align: center;
+            box-shadow: 0 3px 8px rgba(52, 26, 110, 0.18);
+            margin-bottom: 10px;
+        }
+
+        .word-display {
+            font-family: 'Fredoka', 'JetBrains Mono', monospace;
+            font-size: clamp(26px, 3.4vw, 36px);
+            font-weight: 700;
+            letter-spacing: clamp(6px, 1.2vw, 12px);
+            color: #ffffff;
+            overflow-wrap: anywhere;
+            line-height: 1.3;
+        }
+
+        /* Guesses status */
+        .guess-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .guess-stats-legend {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-dot-sm {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 3px;
+        }
+
+        /* ── VIRTUAL KEYBOARD ─────────────────────────────────── */
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 7px;
+            margin: 0 0 12px;
+        }
+
+        .key {
+            padding: 12px 2px;
+            border-radius: var(--radius-sm);
+            background: #ffffff;
+            border: 1.5px solid #d4c5ee;
+            color: var(--text-dark);
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: clamp(14px, 1.15vw, 17px);
+            min-height: 48px;
+            cursor: pointer;
+            box-shadow: 0 2.5px 0 #cfc0ec, 0 2px 4px rgba(0, 0, 0, 0.04);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+            user-select: none;
+            outline: none;
+        }
+
+        .key:hover:not(:disabled) {
+            background: var(--bg-surface-elevated);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 #bda6e8;
+        }
+
+        .key:active:not(:disabled) {
+            transform: translateY(2px) !important;
+            box-shadow: 0 1px 0 #cfc0ec !important;
+        }
+
+        .key:disabled {
+            background: #f1ecf7;
+            border-color: #e4d8f2;
+            color: #a494be;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .key.correct {
+            background: #10b981 !important;
+            border-color: #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 2.5px 0 #047857 !important;
+        }
+
+        .key.wrong {
+            background: #f87171 !important;
+            border-color: #dc2626 !important;
+            color: #ffffff !important;
+            box-shadow: none !important;
+            opacity: 0.45 !important;
+            text-decoration: line-through;
+        }
+
+        /* ── FEEDBACK BANNER ──────────────────────────────────── */
+        .feedback-banner {
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .feedback-banner.good {
+            background: #e6f9f0;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+
+        .feedback-banner.bad {
+            background: #fff1f4;
+            color: #9f1239;
+            border: 1px solid #ff8aa3;
+        }
+
+        /* ── BOTTOM ACTIONS (HINT + TIP) ──────────────────────── */
+        .hint-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 6px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .hint-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+            color: #2b145a;
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 7px 14px;
+            cursor: pointer;
+            box-shadow: 0 3px 0 var(--gold-3d), 0 4px 10px rgba(245, 158, 11, 0.2);
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+        }
+
+        .hint-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 0 var(--gold-3d), 0 6px 14px rgba(245, 158, 11, 0.28);
+        }
+
+        .hint-btn:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 var(--gold-3d);
+        }
+
+        .hint-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: 0 2px 0 var(--gold-3d) !important;
+        }
+
+        .keyboard-tip {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* ── RESULT MODAL ─────────────────────────────────────── */
+        .result-modal {
+            margin-top: 18px;
+            padding: 24px 20px;
+            border-radius: var(--radius-lg);
+            background: #ffffff;
+            border: 2px solid var(--border-medium);
+            text-align: center;
+            box-shadow: var(--shadow-elevated);
+            animation: resultPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+            position: relative;
+            z-index: 50;
+        }
+
+        @keyframes resultPop {
+            0%   { opacity: 0; transform: translateY(16px) scale(0.96); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .result-modal.win {
+            border: 2px solid var(--emerald);
+        }
+
+        .result-modal.loss {
+            border: 2px solid var(--coral);
+        }
+
+        .result-heading {
+            font-family: 'Outfit', 'Fredoka', sans-serif;
+            font-size: clamp(22px, 3.2vw, 30px);
+            font-weight: 800;
+            color: var(--text-dark);
+            margin: 8px 0 4px;
+        }
+
+        .result-subtext {
+            font-size: 13.5px;
+            color: var(--text-subtle);
+            margin-bottom: 10px;
+        }
+
+        .result-xp {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: #b45309;
+            margin: 8px 0;
+        }
+
+        .xp-breakdown {
+            display: inline-block;
+            background: #f4effc;
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 10px 18px;
+            margin: 6px 0 16px;
+            font-size: 12.5px;
+            color: var(--text-dark);
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        .xp-breakdown strong {
+            color: var(--primary);
+            display: block;
+            margin-bottom: 2px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13px;
+        }
+
+        .answer-reveal {
+            font-family: 'Fredoka', monospace;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: 5px;
+            color: var(--coral-dark);
+            margin: 8px 0;
+        }
+
+        /* ── FIREWORKS CANVAS ─────────────────────────────────── */
+        #fireworks {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 860px) {
+            .stadium-field { grid-template-columns: 1fr; }
+            .game-hud-strip { grid-template-columns: 1fr; gap: 8px; text-align: center; }
+            .hud-left, .hud-right { justify-content: center; }
+            .keyboard-grid { grid-template-columns: repeat(6, 1fr); }
+            .arena-stadium-board { padding: 14px 12px; }
+        }
+
+        @media (max-width: 500px) {
+            .game-page-wrap { padding: 8px 8px 24px; }
+            .keyboard-grid { gap: 3px; }
+            .key { padding: 7px 1px; font-size: 13px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Fireworks Canvas -->
+<canvas id="fireworks"></canvas>
+
+<!-- CONSISTENT SITE NAVBAR -->
+<header class="site-navbar">
+    <div class="navbar-inner">
+        <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+            <div class="emblem-icon">⚔</div>
+            <div class="emblem-title">
+                HANGMAN ARENA
+                <span class="sub">Battle Arena</span>
+            </div>
+        </a>
+
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <button
+                type="button"
+                class="play-btn play-btn-glass"
+                id="soundToggle"
+                style="padding: 5px 12px; font-size: 12px;"
+            >
+                🔊 Sound ON
+            </button>
+
+            <a href="{{ url_for('dashboard') }}" class="play-btn play-btn-glass" style="padding: 5px 12px; font-size: 12px;">
+                ← Dashboard
+            </a>
+        </div>
+    </div>
+</header>
+
+<div class="game-page-wrap">
+
+    <!-- MAIN STADIUM BOARD -->
+    <main class="arena-stadium-board">
+
+        <!-- COMBAT HUD STRIP -->
+        <div class="game-hud-strip">
+
+            <div class="hud-left">
+                <span class="game-pill game-pill-gold">⚔ {{ difficulty }}</span>
+                <div class="hud-lives-block">
+                    <span class="hud-lives-label">LIVES:</span>
+                    <span class="hud-lives-val">❤️ {{ remaining_lives }} / {{ max_attempts }}</span>
+                </div>
+            </div>
+
+            <div class="hud-center">
+                <div class="hud-timer-badge" id="timerCard">
+                    <span class="timer-icon">⏳</span>
+                    <strong id="timer">{{ remaining_time }}</strong>
+                    <span class="timer-sec">SEC</span>
+                </div>
+            </div>
+
+            <div class="hud-right">
+                <div class="hud-wrong-block">
+                    <span class="hud-wrong-label">WRONG:</span>
+                    <span class="hud-wrong-val">❌ <strong>{{ wrong }}</strong></span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- PLAYING FIELD: GALLOWS + DECK -->
+        <div class="stadium-field">
+
+            <!-- LEFT: GALLOWS STAGE -->
+            <div class="gallows-stage">
+                <span class="stage-label">ARENA GALLOWS</span>
+
+                <svg class="hangman-svg" viewBox="0 0 250 260">
+
+                    <!-- Scaffold -->
+                    <line class="gallows-line" x1="30" y1="235" x2="160" y2="235"/>
+                    <line class="gallows-line" x1="65" y1="235" x2="65"  y2="25" />
+                    <line class="gallows-line" x1="65" y1="25"  x2="155" y2="25" />
+                    <line class="gallows-line" x1="155" y1="25" x2="155" y2="55" />
+
+                    <!-- Dynamic body parts -->
+                    {% if wrong >= 1 %}
+                    <circle class="body-part" cx="155" cy="78"  r="23"/>
+                    {% endif %}
+
+                    {% if wrong >= 2 %}
+                    <line  class="body-part" x1="155" y1="101" x2="155" y2="165"/>
+                    {% endif %}
+
+                    {% if wrong >= 3 %}
+                    <line  class="body-part" x1="155" y1="115" x2="125" y2="145"/>
+                    {% endif %}
+
+                    {% if wrong >= 4 %}
+                    <line  class="body-part" x1="155" y1="115" x2="185" y2="145"/>
+                    {% endif %}
+
+                    {% if wrong >= 5 %}
+                    <line  class="body-part" x1="155" y1="165" x2="125" y2="200"/>
+                    {% endif %}
+
+                    {% if wrong >= 6 %}
+                    <line  class="body-part" x1="155" y1="165" x2="185" y2="200"/>
+                    {% endif %}
+
+                    {% if wrong >= 7 %}
+                    <line  class="body-part" x1="145" y1="70"  x2="150" y2="75" />
+                    {% endif %}
+
+                    {% if wrong >= 8 %}
+                    <line  class="body-part" x1="160" y1="70"  x2="165" y2="75" />
+                    {% endif %}
+
+                </svg>
+
+                <span class="strikes-counter">STRIKES: {{ wrong }} OF {{ max_attempts }}</span>
+            </div>
+
+            <!-- RIGHT: WORD SLOTS + KEYBOARD -->
+            <div class="combat-deck">
+
+                <span class="deck-label">⚡ DECODE THE SECRET WORD</span>
+
+                <!-- WORD DISPLAY -->
+                <div class="word-slot-box">
+                    <div class="word-display">{{ display_word }}</div>
+                </div>
+
+                <!-- GUESS COUNT + LEGEND -->
+                <div class="guess-stats">
+                    <span>Guessed: <strong style="color: var(--text-dark);">{{ guessed | length }}</strong></span>
+                    <span class="guess-stats-legend">
+                        <span>
+                            <i class="legend-dot-sm" style="background: var(--emerald);"></i>Correct
+                        </span>
+                        <span>
+                            <i class="legend-dot-sm" style="background: var(--coral);"></i>Wrong
+                        </span>
+                    </span>
+                </div>
+
+                <!-- GUESS FORM + VIRTUAL KEYBOARD -->
+                <form method="POST" id="guessForm">
+                    <input type="hidden" name="action" value="guess">
+
+                    <div class="keyboard-grid">
+                        {% for letter in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+                            <button
+                                type="submit"
+                                name="guess"
+                                value="{{ letter }}"
+                                class="key {% if letter in correct_guesses %}correct{% endif %} {% if letter in wrong_guesses %}wrong{% endif %}"
+                                {% if letter in guessed or game_over %}disabled{% endif %}
+                            >
+                                {{ letter }}
+                            </button>
+                        {% endfor %}
+                    </div>
+                </form>
+
+                <!-- LIVE FEEDBACK -->
+                {% if guessed %}
+                    {% set last_letter = guessed[-1] %}
+                    <div class="feedback-banner {% if last_letter in correct_guesses %}good{% else %}bad{% endif %}">
+                        {% if last_letter in correct_guesses %}
+                            ✓ Excellent! '{{ last_letter }}' is in the word!
+                        {% else %}
+                            ✕ Strike! '{{ last_letter }}' is not in the word.
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <!-- HINT BUTTON + KEYBOARD TIP -->
+                <div class="hint-row">
+                    <form method="POST" id="hintForm">
+                        <input type="hidden" name="action" value="hint">
+                        <button
+                            type="submit"
+                            class="hint-btn"
+                            {% if hint_used or game_over %}disabled{% endif %}
+                        >
+                            {% if hint_used %}
+                                💡 Hint Revealed (-20 XP)
+                            {% else %}
+                                💡 Use Hint (-20 XP)
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <span class="keyboard-tip">
+                        ⌨ Physical Keys A–Z Supported
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- OUTCOME MODAL (TRIGGERED AT GAME OVER) -->
+        {% if game_over %}
+            {% if won or result == 'Win' %}
+                <div class="result-modal win">
+                    <div style="font-size: 46px; margin-bottom: 4px;">🎉</div>
+                    <div class="game-pill game-pill-emerald" style="font-size: 11px;">VICTORY ACHIEVED</div>
+
+                    <h2 class="result-heading" style="color: var(--emerald);">GLORIOUS TRIUMPH!</h2>
+
+                    <p class="result-subtext">
+                        You solved the secret word before running out of attempts!
+                    </p>
+
+                    <div class="result-xp">+{{ score }} XP</div>
+
+                    <div class="xp-breakdown">
+                        <strong>🏅 Score Breakdown:</strong>
+                        Base XP: +{{ 80 if hint_used else 100 }} &bull; Difficulty Bonus: +{{ difficulty_bonus }}
+                        {% if score > (80 if hint_used else 100) + difficulty_bonus %}&bull; Speed Bonus: +20 XP{% endif %}
+                        {% if hint_used %}&bull; Hint Penalty: -20 XP{% endif %}
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <a href="/difficulty" class="play-btn play-btn-primary" style="padding: 9px 20px;">
+                            🎮 Play Again
+                        </a>
+                        <a href="/leaderboard" class="play-btn play-btn-gold" style="padding: 9px 20px;">
+                            🏆 Standings
+                        </a>
+                        <a href="/dashboard" class="play-btn play-btn-glass" style="padding: 9px 20px;">
+                            ← Dashboard
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <div class="result-modal loss">
+                    <div style="font-size: 46px; margin-bottom: 4px;">💀</div>
+                    <div class="game-pill game-pill-coral" style="font-size: 11px;">FALLEN IN COMBAT</div>
+
+                    <h2 class="result-heading" style="color: var(--coral);">DEFEAT IN THE ARENA</h2>
+
+                    <p class="result-subtext">
+                        You ran out of attempts! Better luck on your next battle.
+                    </p>
+
+                    <div style="margin: 10px 0;">
+                        <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">The mystery word was:</span>
+                        <div class="answer-reveal">{{ word or answer }}</div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+                        <a href="/difficulty" class="play-btn play-btn-coral" style="padding: 9px 20px;">
+                            🔄 Retry Battle
+                        </a>
+                        <a href="/dashboard" class="play-btn play-btn-glass" style="padding: 9px 20px;">
+                            ← Dashboard
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+    </main>
+
+</div>
+
+<footer class="site-footer">
+    <div class="footer-inner" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #bda7dc; flex-wrap: wrap; gap: 8px;">
+        <div>&copy; 2026 HANGMAN ARENA &bull; CASUAL WORD GAMING PLATFORM</div>
+        <div>PLAY FAIR &bull; CONQUER THE ARENA</div>
+    </div>
+</footer>
+
+<!-- JAVASCRIPT LOGIC -->
+<script>
+    // 1. SOUND MANAGER
+    const SoundManager = {
+        enabled: localStorage.getItem('sound_enabled') !== 'false',
+        ctx: null,
+
+        init() {
+            if (!this.ctx) {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx) this.ctx = new AudioCtx();
+            }
+        },
+
+        playTone(freq, type, duration) {
+            if (!this.enabled) return;
+            try {
+                this.init();
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + duration);
+            } catch (e) {}
+        },
+
+        correct() {
+            this.playTone(587.33, 'sine', 0.12);
+            setTimeout(() => this.playTone(880, 'sine', 0.2), 100);
+        },
+
+        wrong() {
+            this.playTone(220, 'triangle', 0.15);
+            setTimeout(() => this.playTone(164.81, 'sawtooth', 0.25), 120);
+        },
+
+        win() {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sine', 0.25), i * 130));
+        },
+
+        loss() {
+            const notes = [392.00, 349.23, 311.13, 261.63];
+            notes.forEach((f, i) => setTimeout(() => this.playTone(f, 'sawtooth', 0.28), i * 160));
+        }
+    };
+
+    // Sound toggle button
+    const soundBtn = document.getElementById('soundToggle');
+    if (soundBtn) {
+        soundBtn.textContent = SoundManager.enabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+        soundBtn.addEventListener('click', () => {
+            SoundManager.enabled = !SoundManager.enabled;
+            localStorage.setItem('sound_enabled', SoundManager.enabled);
+            soundBtn.textContent = SoundManager.enabled ? '🔊 Sound ON' : '🔇 Sound OFF';
+            if (SoundManager.enabled) SoundManager.playTone(440, 'sine', 0.1);
+        });
+    }
+
+    // Play sounds on outcome
+    {% if game_over %}
+        {% if won or result == 'Win' %}
+            setTimeout(() => SoundManager.win(), 200);
+            startFireworks();
+        {% else %}
+            setTimeout(() => SoundManager.loss(), 200);
+        {% endif %}
+    {% else %}
+        {% if guessed %}
+            {% if guessed[-1] in correct_guesses %}
+                SoundManager.correct();
+            {% else %}
+                SoundManager.wrong();
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
+    // 2. LIVE COUNTDOWN TIMER
+    let timeLeft = {{ remaining_time }};
+    const isGameOver = {{ 'true' if game_over else 'false' }};
+    const timerEl = document.getElementById('timer');
+    const timerCard = document.getElementById('timerCard');
+
+    if (!isGameOver && timeLeft > 0) {
+        const timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timerEl) timerEl.textContent = timeLeft;
+
+            if (timeLeft <= 10 && timerCard) {
+                timerCard.classList.add('warning');
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                const form = document.createElement('form');
+                form.method = 'POST';
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = 'timeout';
+                form.appendChild(actionInput);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }, 1000);
+    }
+
+    // 3. PHYSICAL KEYBOARD CAPTURE
+    if (!isGameOver) {
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            const letter = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(letter)) {
+                const btn = document.querySelector(`.key[value="${letter}"]`);
+                if (btn && !btn.disabled) {
+                    btn.click();
+                }
+            }
+        });
+    }
+
+    // 4. FIREWORKS ENGINE
+    function startFireworks() {
+        const canvas = document.getElementById('fireworks');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const colors = ['#ff476f', '#7c3aed', '#f59e0b', '#10b981', '#38bdf8', '#fb7185'];
+
+        function createExplosion(x, y) {
+            for (let i = 0; i < 45; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 6;
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    radius: 2 + Math.random() * 2.5,
+                    alpha: 1,
+                    decay: 0.015 + Math.random() * 0.02
+                });
+            }
+        }
+
+        // Trigger burst sequence
+        createExplosion(width * 0.3, height * 0.3);
+        setTimeout(() => createExplosion(width * 0.7, height * 0.25), 250);
+        setTimeout(() => createExplosion(width * 0.5, height * 0.4), 500);
+        setTimeout(() => createExplosion(width * 0.25, height * 0.45), 800);
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.08;
+                p.alpha -= p.decay;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            if (particles.length > 0) {
+                requestAnimationFrame(animate);
+            }
+        }
+        animate();
+    }
+</script>
+
+</body>
+</html>

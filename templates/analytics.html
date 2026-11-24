@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Analytics | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .analytics-hero {
+            text-align: center;
+            padding: 16px 18px 12px;
+        }
+
+        .analytics-hero .hero-icon {
+            font-size: 34px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .analytics-hero h1 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .analytics-hero p {
+            font-size: 13px;
+            color: var(--text-subtle);
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .analytics-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 860px) {
+            .analytics-split { grid-template-columns: 1fr; }
+        }
+
+        .analytics-panel {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .analytics-panel h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .donut-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            padding: 6px 0;
+        }
+
+        .donut-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            box-shadow: var(--shadow-card);
+        }
+
+        .donut-ring::before {
+            content: '';
+            position: absolute;
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .donut-center {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .donut-center strong {
+            display: block;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+
+        .donut-center span {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            font-weight: 700;
+        }
+
+        .donut-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 13px;
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.win  { background: var(--emerald); }
+        .legend-dot.loss { background: var(--coral); }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-row-label {
+            color: var(--text-subtle);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-row-value {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .spectrum-panel {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            box-shadow: var(--shadow-card);
+            margin-bottom: 20px;
+        }
+
+        .spectrum-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .spectrum-panel-header h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .spectrum-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .match-bar-row {
+            padding: 9px 0;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .match-bar-row:last-child {
+            border-bottom: none;
+        }
+
+        .match-bar-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+            font-size: 12.5px;
+            flex-wrap: wrap;
+        }
+
+        .match-bar-word {
+            color: var(--text-dark);
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .match-bar-score {
+            color: #b45309;
+            font-weight: 800;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 13px;
+        }
+
+        .bar-track {
+            height: 8px;
+            background: rgba(52, 26, 110, 0.08);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: var(--radius-pill);
+            transition: width 0.8s ease;
+        }
+
+        .bar-fill.win-bar {
+            background: linear-gradient(90deg, var(--emerald), #34d399);
+        }
+
+        .bar-fill.loss-bar {
+            background: linear-gradient(90deg, var(--coral), #fb7185);
+        }
+
+        .empty-chart {
+            text-align: center;
+            padding: 24px 14px;
+        }
+
+        .empty-chart .empty-icon {
+            font-size: 32px;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .empty-chart h3 {
+            color: var(--primary);
+            font-size: 15px;
+            margin-bottom: 2px;
+        }
+
+        .empty-chart p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Performance Analytics</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('profile') }}" class="nav-link-item">👤 Profile</a></li>
+                    <li><a href="{{ url_for('game_history') }}" class="nav-link-item">📜 Match History</a></li>
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="analytics-hero">
+        <span class="hero-icon">📊</span>
+        <h1>PERFORMANCE ANALYTICS</h1>
+        <p>Your combat telemetry, victory ratios, and match history trends at a glance.</p>
+    </section>
+
+    <main class="site-page-container">
+
+        <!-- TOP STAT CARDS -->
+        <section class="stats-grid" style="margin-bottom: 14px;">
+
+            <div class="stat-card">
+                <div class="stat-icon">🎮</div>
+                <div class="stat-label">Total Games</div>
+                <div class="stat-value">{{ total_games }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">Total Wins</div>
+                <div class="stat-value" style="color: var(--emerald);">{{ total_wins }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">Total XP</div>
+                <div class="stat-value" style="color: #b45309;">{{ total_xp }}</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon">🚀</div>
+                <div class="stat-label">Best Score</div>
+                <div class="stat-value" style="color: var(--coral);">{{ best_score }}</div>
+            </div>
+
+        </section>
+
+        <!-- DUAL PANELS -->
+        <section class="analytics-split">
+
+            <!-- WIN/LOSS DONUT -->
+            <div class="analytics-panel">
+                <h2>📈 Win / Loss Ratio</h2>
+
+                {% if total_games > 0 %}
+
+                    <div class="donut-layout">
+                        <div
+                            class="donut-ring"
+                            style="background: conic-gradient(
+                                var(--emerald) 0deg {{ win_rate * 3.6 }}deg,
+                                var(--coral)   {{ win_rate * 3.6 }}deg 360deg
+                            );"
+                        >
+                            <div class="donut-center">
+                                <strong>{{ win_rate }}%</strong>
+                                <span>Win Rate</span>
+                            </div>
+                        </div>
+
+                        <div class="donut-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot win"></span>
+                                Victories: {{ total_wins }}
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot loss"></span>
+                                Defeats: {{ total_losses }}
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+
+                    <div class="empty-chart">
+                        <span class="empty-icon">🎮</span>
+                        <h3>No Match Data Yet</h3>
+                        <p>Play arena matches to generate your win/loss analytics.</p>
+                    </div>
+
+                {% endif %}
+            </div>
+
+            <!-- DAILY QUEST STATS -->
+            <div class="analytics-panel">
+                <h2>🎯 Daily Quest Stats</h2>
+
+                <div class="stat-row">
+                    <span class="stat-row-label">Daily Quests Attempted</span>
+                    <strong class="stat-row-value">{{ daily_games }}</strong>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-row-label">Daily Quest Victories</span>
+                    <strong class="stat-row-value" style="color: var(--emerald);">{{ daily_wins }}</strong>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-row-label">Daily Quest XP Earned</span>
+                    <strong class="stat-row-value" style="color: #b45309;">{{ daily_xp }}</strong>
+                </div>
+
+                <div class="stat-row">
+                    <span class="stat-row-label">Average XP Per Victory</span>
+                    <strong class="stat-row-value" style="color: var(--primary);">{{ average_xp }}</strong>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RECENT GAME SPECTRUM BARS -->
+        <section class="spectrum-panel">
+
+            <div class="spectrum-panel-header">
+                <h2>🎮 Recent Combat Scoring Spectrum</h2>
+                <span class="game-pill game-pill-violet">LATEST 10 BATTLES</span>
+            </div>
+
+            <p class="spectrum-hint">
+                XP performance bars are scaled proportionally to your highest single match score.
+            </p>
+
+            {% for game in recent_games %}
+
+                <div class="match-bar-row">
+                    <div class="match-bar-meta">
+                        <span class="match-bar-word">
+                            #{{ game['id'] }} &middot; {{ game['word'] }}
+                        </span>
+
+                        <div>
+                            {% if game['result'] == 'Win' %}
+                                <span class="game-pill game-pill-emerald">✓ WIN</span>
+                            {% else %}
+                                <span class="game-pill game-pill-coral">✕ LOSS</span>
+                            {% endif %}
+                        </div>
+
+                        <span class="match-bar-score">{{ game['score'] }} XP</span>
+                    </div>
+
+                    <div class="bar-track">
+                        <div
+                            class="bar-fill {% if game['result'] == 'Win' %}win-bar{% else %}loss-bar{% endif %}"
+                            style="width: {{ (game['score'] / max_recent_score * 100) if max_recent_score > 0 else 0 }}%;"
+                        ></div>
+                    </div>
+                </div>
+
+            {% else %}
+
+                <div class="empty-chart">
+                    <span class="empty-icon">🎮</span>
+                    <h3>No Recent Battles</h3>
+                    <p>Play arena matches to render your performance spectrum!</p>
+                </div>
+
+            {% endfor %}
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 24px;">
+        <div style="text-align: center; font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase;">
+            Hangman Arena &bull; Combat Telemetry &amp; Performance Analytics
+        </div>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Difficulty | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .difficulty-tiers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 14px 0 20px;
+        }
+
+        .tier-portal-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 18px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--ease-smooth) 0.18s;
+            box-shadow: var(--shadow-card);
+        }
+
+        .tier-portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+        }
+
+        .tier-portal-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .tier-badge-icon {
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 8px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.06);
+            transition: transform var(--ease-bounce) 0.2s;
+        }
+
+        .tier-portal-card:hover .tier-badge-icon {
+            transform: scale(1.08);
+        }
+
+        .tier-portal-card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+
+        .tier-specs-list {
+            list-style: none;
+            margin: 10px 0 16px;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .tier-specs-list li {
+            font-size: 12.5px;
+            color: var(--text-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .tier-specs-list li strong {
+            color: var(--text-dark);
+        }
+
+        /* EASY */
+        .tier-easy::before { background: var(--emerald); }
+        .tier-easy:hover { border-color: #34d399; }
+        .tier-easy .tier-badge-icon {
+            background: #d1fae5;
+            border: 1px solid #6ee7b7;
+        }
+        .tier-easy h2 { color: #047857; }
+
+        /* MEDIUM */
+        .tier-medium::before { background: var(--gold); }
+        .tier-medium:hover { border-color: #fbbf24; }
+        .tier-medium .tier-badge-icon {
+            background: var(--amber-soft);
+            border: 1px solid #fcd34d;
+        }
+        .tier-medium h2 { color: #b45309; }
+
+        /* HARD */
+        .tier-hard::before { background: var(--coral); }
+        .tier-hard:hover { border-color: #ff6889; }
+        .tier-hard .tier-badge-icon {
+            background: var(--peach);
+            border: 1px solid var(--border-coral);
+        }
+        .tier-hard h2 { color: var(--coral-dark); }
+
+        @media (max-width: 860px) {
+            .difficulty-tiers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Challenge Select</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container site-page-narrow" style="max-width: 1080px;">
+
+        <section class="section-headline-block">
+            <span class="game-pill game-pill-gold" style="margin-bottom: 6px;">SOLO CAMPAIGN</span>
+            <h1>CHOOSE YOUR CHALLENGE</h1>
+            <p>
+                Pick your difficulty level. Higher tiers feature longer words and fewer lives, but award much more XP!
+            </p>
+        </section>
+
+        <div class="difficulty-tiers-grid difficulty-cards">
+
+            <!-- EASY -->
+            <div class="tier-portal-card tier-easy card easy">
+                <div>
+                    <div class="tier-badge-icon icon">🌱</div>
+                    <h2>EASY</h2>
+                    <span class="game-pill game-pill-emerald">NOVICE TIER</span>
+
+                    <ul class="tier-specs-list features">
+                        <li>🎯 Word Length: <strong>3–5 Letters</strong></li>
+                        <li>🛡 Max Attempts: <strong>6 Lives</strong></li>
+                        <li>💡 Free Hints: <strong>3 Available</strong></li>
+                        <li>⏱ Timer: <strong>60 Seconds</strong></li>
+                        <li>⭐ Reward: <strong>+50 Base XP</strong></li>
+                    </ul>
+                </div>
+
+                <a
+                    href="{{ url_for('game', difficulty='easy') }}"
+                    class="play-btn play-btn-glass btn-block select-btn"
+                    style="border-color: #6ee7b7; color: #047857; padding: 9px 16px; font-size: 13px;"
+                >
+                    START EASY →
+                </a>
+            </div>
+
+            <!-- MEDIUM -->
+            <div class="tier-portal-card tier-medium card medium">
+                <div>
+                    <div class="tier-badge-icon icon">⚡</div>
+                    <h2>MEDIUM</h2>
+                    <span class="game-pill game-pill-gold">WARRIOR TIER</span>
+
+                    <ul class="tier-specs-list features">
+                        <li>🎯 Word Length: <strong>6–8 Letters</strong></li>
+                        <li>🛡 Max Attempts: <strong>6 Lives</strong></li>
+                        <li>💡 Free Hints: <strong>2 Available</strong></li>
+                        <li>⏱ Timer: <strong>45 Seconds</strong></li>
+                        <li>⭐ Reward: <strong>+100 Base XP</strong></li>
+                    </ul>
+                </div>
+
+                <a
+                    href="{{ url_for('game', difficulty='medium') }}"
+                    class="play-btn play-btn-gold btn-block select-btn"
+                    style="padding: 9px 16px; font-size: 13px;"
+                >
+                    START MEDIUM →
+                </a>
+            </div>
+
+            <!-- HARD -->
+            <div class="tier-portal-card tier-hard card hard">
+                <div>
+                    <div class="tier-badge-icon icon">🔥</div>
+                    <h2>HARD</h2>
+                    <span class="game-pill game-pill-coral">GRANDMASTER TIER</span>
+
+                    <ul class="tier-specs-list features">
+                        <li>🎯 Word Length: <strong>8–12 Letters</strong></li>
+                        <li>🛡 Max Attempts: <strong>5 Lives</strong></li>
+                        <li>💡 Free Hints: <strong>1 Available</strong></li>
+                        <li>⏱ Timer: <strong>35 Seconds</strong></li>
+                        <li>⭐ Reward: <strong>+200 Base XP</strong></li>
+                    </ul>
+                </div>
+
+                <a
+                    href="{{ url_for('game', difficulty='hard') }}"
+                    class="play-btn play-btn-coral btn-block select-btn"
+                    style="padding: 9px 16px; font-size: 13px;"
+                >
+                    START HARD →
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 18px 20px; margin-top: 24px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • CHOOSE YOUR BATTLE TIER
+        </div>
+    </footer>
+
+</body>
+</html>

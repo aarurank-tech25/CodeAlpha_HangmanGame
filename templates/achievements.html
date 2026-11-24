@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trophy Cabinet | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        .badges-trophy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .trophy-badge-card {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 16px 14px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all var(--ease-bounce) 0.2s;
+            box-shadow: var(--shadow-card);
+        }
+
+        .trophy-badge-card.unlocked {
+            border-color: var(--border-card);
+            background: #ffffff;
+        }
+
+        .trophy-badge-card.unlocked:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .trophy-badge-card.locked {
+            background: #faf7f2;
+            opacity: 0.75;
+            border-style: dashed;
+        }
+
+        .trophy-badge-card.locked:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .trophy-icon-display {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            transition: transform var(--ease-bounce) 0.2s;
+        }
+
+        .unlocked .trophy-icon-display {
+            background: #fef3c7;
+            border: 1px solid var(--gold);
+        }
+
+        .trophy-badge-card:hover .trophy-icon-display {
+            transform: scale(1.08) rotate(4deg);
+        }
+
+        .locked .trophy-icon-display {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            filter: grayscale(1);
+            opacity: 0.45;
+        }
+
+        .condition-pill {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: var(--text-subtle);
+            background: var(--bg-surface);
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-sm);
+            padding: 4px 8px;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar-wrapper {
+            background: var(--bg-surface-card);
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(52, 26, 110, 0.08);
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            margin: 6px 0 3px;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--coral) 60%, var(--gold) 100%);
+            border-radius: var(--radius-pill);
+            transition: width 0.8s ease;
+        }
+    </style>
+</head>
+<body>
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Trophy Cabinet</span>
+                </div>
+            </a>
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('dashboard') }}" class="nav-link-item">← Dashboard</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container">
+
+        <section class="section-headline-block">
+            <span class="game-pill game-pill-gold" style="margin-bottom: 6px;">TROPHY COLLECTION</span>
+            <h1>ACHIEVEMENTS &amp; BADGES</h1>
+            <p>
+                Every match victory counts towards unlocking rare achievement badges. Complete challenges and fill your trophy case!
+            </p>
+        </section>
+
+        <!-- PROGRESS HUD -->
+        <section class="stats-grid summary" style="margin-bottom: 14px;">
+            <div class="stat-card summary-card">
+                <div class="stat-icon">🎖</div>
+                <div class="stat-label">BADGES UNLOCKED</div>
+                <div class="stat-value" style="color: #b45309;">{{ unlocked_count }}/{{ total_badges }}</div>
+            </div>
+
+            <div class="stat-card summary-card">
+                <div class="stat-icon">🏆</div>
+                <div class="stat-label">TOTAL VICTORIES</div>
+                <div class="stat-value" style="color: var(--primary);">{{ total_wins }}</div>
+            </div>
+
+            <div class="stat-card summary-card">
+                <div class="stat-icon">⭐</div>
+                <div class="stat-label">LIFETIME XP</div>
+                <div class="stat-value" style="color: var(--coral);">{{ player_xp }}</div>
+            </div>
+        </section>
+
+        <!-- BADGE COMPLETION PROGRESS -->
+        <div class="progress-bar-wrapper progress-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 13.5px; color: var(--primary);">🏅 Badge Completion Progress</h3>
+                <span style="font-size: 12px; color: #b45309; font-weight: 800;">{{ unlocked_count }} of {{ total_badges }} Unlocked</span>
+            </div>
+            <div class="progress-bar-track progress-track">
+                <div class="progress-bar-fill progress-fill"
+                     style="width: {{ (unlocked_count / total_badges * 100) if total_badges > 0 else 0 }}%;">
+                </div>
+            </div>
+        </div>
+
+        <h2 style="font-size: 1.15rem; margin-bottom: 10px; color: var(--primary);">
+            🎖 Your Trophy Collection
+        </h2>
+
+        <!-- BADGES SHOWCASE -->
+        <div class="badges-trophy-grid badge-grid">
+
+            {% for badge in badges %}
+            <div class="trophy-badge-card badge-card {% if badge['unlocked'] %}unlocked{% else %}locked{% endif %}">
+
+                <div>
+                    <div class="trophy-icon-display badge-icon">
+                        {{ badge['icon'] }}
+                    </div>
+
+                    <h3 style="font-size: 15px; margin-bottom: 4px; color: var(--text-dark);">{{ badge['name'] }}</h3>
+
+                    <p style="color: var(--text-subtle); font-size: 12px; line-height: 1.45; margin-bottom: 8px; min-height: 34px;">
+                        {{ badge['description'] }}
+                    </p>
+
+                    <div class="condition-pill condition">
+                        {{ badge['condition'] }}
+                    </div>
+                </div>
+
+                <div>
+                    {% if badge['unlocked'] %}
+                        <span class="game-pill game-pill-emerald status">✓ UNLOCKED</span>
+                    {% else %}
+                        <span class="game-pill game-pill-violet status">🔒 LOCKED</span>
+                    {% endif %}
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </main>
+
+    <footer class="site-footer" style="padding: 16px 20px; margin-top: 28px;">
+        <div class="footer-inner" style="text-align: center; font-size: 12px; color: var(--text-muted);">
+            HANGMAN ARENA • COLLECT ALL ACHIEVEMENTS • BECOME A LEGEND
+        </div>
+    </footer>
+</body>
+</html>

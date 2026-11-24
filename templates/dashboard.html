@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Player Dashboard | Hangman Arena</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <style>
+        /* ── WELCOME BANNER ──────────────────────────────────── */
+        .player-welcome-banner {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 22px 28px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-card);
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-welcome-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--coral), var(--primary), var(--gold));
+        }
+
+        .player-avatar-circle {
+            width: 66px;
+            height: 66px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--coral), var(--primary));
+            border: 3px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            box-shadow: 0 2.5px 0 var(--coral-3d);
+            flex-shrink: 0;
+            position: relative;
+            color: #ffffff;
+        }
+
+        .avatar-level-badge {
+            position: absolute;
+            bottom: -5px;
+            padding: 1px 7px;
+            border-radius: var(--radius-pill);
+            background: var(--amber-soft);
+            border: 1px solid #fcd34d;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 9.5px;
+            font-weight: 800;
+            color: #92400e;
+            white-space: nowrap;
+        }
+
+        .welcome-meta h1 {
+            font-size: clamp(1.4rem, 2.2vw, 1.85rem);
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .welcome-meta p {
+            font-size: 0.95rem;
+            color: var(--text-subtle);
+        }
+
+        /* ── XP PROGRESS HUB ─────────────────────────────────── */
+        .xp-summary-box {
+            min-width: 260px;
+            background: var(--bg-surface-elevated);
+            border: 1.5px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            text-align: right;
+        }
+
+        .xp-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .xp-track-bar {
+            width: 100%;
+            height: 12px;
+            background: #e4d8f5;
+            border-radius: var(--radius-pill);
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .xp-fill-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--coral), var(--primary), var(--gold));
+            border-radius: var(--radius-pill);
+            transition: width 0.5s ease;
+        }
+
+        /* ── 4 STATS ROW ─────────────────────────────────────── */
+        .stats-hud-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .hud-stat-box {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 18px 16px;
+            box-shadow: var(--shadow-card);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-stat-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2.5px;
+        }
+
+        .hud-stat-box.stat-games::before { background: var(--primary); }
+        .hud-stat-box.stat-wins::before  { background: var(--emerald); }
+        .hud-stat-box.stat-loss::before  { background: var(--coral); }
+        .hud-stat-box.stat-rate::before  { background: var(--gold); }
+
+        .hud-stat-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .hud-stat-value {
+            font-family: 'Fredoka', 'Outfit', sans-serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        /* ── 3 MODE LAUNCHERS ────────────────────────────────── */
+        .launchers-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .launcher-card {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-lg);
+            padding: 24px 22px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all var(--ease-smooth) 0.18s;
+        }
+
+        .launcher-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--border-card-hover);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .launcher-icon {
+            font-size: 34px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .launcher-card h3 {
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .launcher-card p {
+            font-size: 0.95rem;
+            color: var(--text-subtle);
+            line-height: 1.55;
+            margin-bottom: 20px;
+        }
+
+        /* ── SHORTCUT TILES ──────────────────────────────────── */
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .shortcut-tile {
+            background: #ffffff;
+            border: 1.5px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-card);
+            transition: all var(--ease-smooth) 0.16s;
+            text-decoration: none;
+            color: var(--text-dark);
+        }
+
+        .shortcut-tile:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            background: var(--bg-surface-elevated);
+            color: var(--primary-dark);
+        }
+
+        .shortcut-tile span.icon {
+            font-size: 22px;
+        }
+
+        .shortcut-tile span.text {
+            font-size: 0.925rem;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        @media (max-width: 860px) {
+            .player-welcome-banner {
+                grid-template-columns: 1fr;
+                text-align: center;
+                gap: 12px;
+            }
+            .player-avatar-circle {
+                margin: 0 auto;
+            }
+            .xp-summary-box {
+                text-align: center;
+            }
+            .stats-hud-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .launchers-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="site-navbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('dashboard') }}" class="brand-emblem">
+                <div class="emblem-icon">⚔</div>
+                <div class="emblem-title">
+                    HANGMAN ARENA
+                    <span class="sub">Player Hub</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul class="nav-links-menu">
+                    <li><a href="{{ url_for('difficulty') }}" class="nav-link-item active">🎮 Play</a></li>
+                    <li><a href="{{ url_for('multiplayer.lobby') }}" class="nav-link-item">👥 1v1 Duels</a></li>
+                    <li><a href="{{ url_for('daily_challenge') }}" class="nav-link-item">📅 Daily</a></li>
+                    <li><a href="{{ url_for('leaderboard') }}" class="nav-link-item">🏆 Leaderboard</a></li>
+                    <li><a href="{{ url_for('profile') }}" class="nav-link-item">👤 Profile</a></li>
+                    <li><a href="{{ url_for('logout') }}" class="nav-link-item btn-logout">Logout ↗</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="site-page-container">
+
+        <!-- WELCOME BANNER -->
+        <section class="player-welcome-banner profile-hero">
+            <div class="player-avatar-circle avatar">
+                👤
+                <span class="avatar-level-badge level-badge">LVL {{ player['level'] }}</span>
+            </div>
+
+            <div class="welcome-meta profile-info">
+                <h1>Welcome back, <span style="color: var(--coral);">{{ player['username'] }}</span>!</h1>
+                <p>
+                    Rank Tier: <strong style="color: var(--primary);">Word Gladiator</strong> &bull; Ready to test your vocabulary today?
+                </p>
+            </div>
+
+            <!-- XP SUMMARY -->
+            <div class="xp-summary-box xp-container">
+                <div class="xp-header-row">
+                    <span style="color: var(--text-muted); font-size: 11px;">LEVEL PROGRESS</span>
+                    <span style="color: #b45309; font-weight: 800;">⭐ {{ player['xp'] }} XP</span>
+                </div>
+                <div class="xp-track-bar xp-bar">
+                    <div class="xp-fill-bar xp-progress" style="width: {{ (player['xp'] % 100) }}%;"></div>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">
+                    {{ 100 - (player['xp'] % 100) }} XP to reach Level {{ player['level'] + 1 }}
+                </div>
+            </div>
+        </section>
+
+        <!-- 4 STATS ROW -->
+        <section class="stats-hud-grid stats-grid">
+            <div class="hud-stat-box stat-games">
+                <div class="hud-stat-label">GAMES PLAYED</div>
+                <div class="hud-stat-value" style="color: var(--primary);">{{ total_games }}</div>
+            </div>
+
+            <div class="hud-stat-box stat-wins">
+                <div class="hud-stat-label">VICTORIES</div>
+                <div class="hud-stat-value" style="color: var(--emerald);">{{ total_wins }}</div>
+            </div>
+
+            <div class="hud-stat-box stat-loss">
+                <div class="hud-stat-label">DEFEATS</div>
+                <div class="hud-stat-value" style="color: var(--coral);">{{ total_games - total_wins }}</div>
+            </div>
+
+            <div class="hud-stat-box stat-rate">
+                <div class="hud-stat-label">WIN RATE</div>
+                <div class="hud-stat-value" style="color: #b45309;">
+                    {% if total_games > 0 %}
+                        {{ ((total_wins / total_games) * 100) | round(1) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- 3 MODE LAUNCHERS -->
+        <section class="launchers-grid game-modes">
+
+            <!-- SOLO ARENA -->
+            <div class="launcher-card mode-card">
+                <div>
+                    <span class="launcher-icon">🎯</span>
+                    <h3>Solo Arena</h3>
+                    <p>
+                        Select Easy, Medium, or Hard difficulty. Solve words to level up and earn XP.
+                    </p>
+                </div>
+                <a href="{{ url_for('difficulty') }}" class="play-btn play-btn-primary btn-block">
+                    PLAY SOLO →
+                </a>
+            </div>
+
+            <!-- DAILY CHALLENGE -->
+            <div class="launcher-card mode-card">
+                <div>
+                    <span class="launcher-icon">📅</span>
+                    <h3>Daily Quest</h3>
+                    <p>
+                        One mystery word every 24 hours. Solve it in fewest attempts for huge bonus XP.
+                    </p>
+                </div>
+                <a href="{{ url_for('daily_challenge') }}" class="play-btn play-btn-gold btn-block">
+                    DAILY CHALLENGE →
+                </a>
+            </div>
+
+            <!-- 1V1 MULTIPLAYER -->
+            <div class="launcher-card mode-card">
+                <div>
+                    <span class="launcher-icon">⚔️</span>
+                    <h3>1v1 Live Duels</h3>
+                    <p>
+                        Challenge friends in real time. Take turns guessing letters in a shared room!
+                    </p>
+                </div>
+                <a href="{{ url_for('multiplayer.lobby') }}" class="play-btn play-btn-coral btn-block">
+                    1v1 MULTIPLAYER →
+                </a>
+            </div>
+
+        </section>
+
+        <!-- QUICK ACCESS DECK -->
+        <div style="margin-top: 14px;">
+            <div style="font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">
+                QUICK ACCESS
+            </div>
+
+            <div class="shortcuts-grid">
+                <a href="{{ url_for('leaderboard') }}" class="shortcut-tile">
+                    <span class="icon">🏆</span>
+                    <span class="text">Hall of Fame</span>
+                </a>
+
+                <a href="{{ url_for('achievements') }}" class="shortcut-tile">
+                    <span class="icon">🎖</span>
+                    <span class="text">Badges &amp; Trophies</span>
+                </a>
+
+                <a href="{{ url_for('game_history') }}" class="shortcut-tile">
+                    <span class="icon">📜</span>
+                    <span class="text">Match Archives</span>
+                </a>
+
+                <a href="{{ url_for('daily_leaderboard.analytics') }}" class="shortcut-tile">
+                    <span class="icon">📊</span>
+                    <span class="text">Combat Stats</span>
+                </a>
+
+                <a href="{{ url_for('profile') }}" class="shortcut-tile">
+                    <span class="icon">👤</span>
+                    <span class="text">Gladiator Profile</span>
+                </a>
+
+                <a href="{{ url_for('account_settings.settings') }}" class="shortcut-tile">
+                    <span class="icon">🔐</span>
+                    <span class="text">Account Security</span>
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #bda7dc; flex-wrap: wrap; gap: 8px;">
+            <div>&copy; 2026 Hangman Arena &bull; Logged in as <strong>{{ player['username'] }}</strong></div>
+            <div>GUESS SMART &bull; PLAY FAIR &bull; CONQUER THE ARENA</div>
+        </div>
+    </footer>
+
+</body>
+</html>

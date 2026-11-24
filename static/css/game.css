@@ -1,0 +1,880 @@
+/* ===================================================================
+   HANGMAN ARENA — COMMERCIAL ARCADE GAMING DESIGN SYSTEM
+   Standard Desktop Display: 1366x768, 1440x900, 1536x864, 1920x1080
+   Sensible 16px root, fluid responsive layout at 100% browser zoom.
+   Palette: Warm Cream/Ivory Canvas, Royal Purple Brand,
+            Vibrant Coral & Sunset Orange, Lavender Surfaces, Plum Typography.
+   =================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700&display=swap');
+
+:root {
+    /* Warm Ivory & Cream Canvas Surfaces */
+    --bg-main: #fbf9f5;
+    --bg-surface: #ffffff;
+    --bg-surface-card: #ffffff;
+    --bg-surface-elevated: #f4effc;
+    --bg-surface-hover: #ede5f9;
+    --bg-surface-glass: #ffffff;
+    --bg-nav: #341a6e;
+
+    /* Royal Purple Main Brand */
+    --primary: #4c249f;
+    --primary-light: #6737c7;
+    --primary-dark: #351775;
+    --primary-3d: #230d52;
+    --violet-600: #4c249f;
+    --violet-500: #5f32bf;
+    --violet-400: #7b4ec9;
+    --violet-300: #9e77df;
+    --violet-200: #c9b4ee;
+    --violet-100: #ede5f9;
+    --violet-glow: rgba(76, 36, 159, 0.15);
+
+    /* Soft Lavender Surfaces & Accents */
+    --lavender: #f1ecfa;
+    --lavender-subtle: #e3d8f5;
+    --lavender-muted: #6b528f;
+    --lavender-dark: #d5c4f0;
+    --lavender-200: #e3d8f5;
+
+    /* Vibrant Coral & Sunset Orange */
+    --coral: #ff476f;
+    --coral-light: #ff6889;
+    --coral-dark: #e62e59;
+    --coral-3d: #b8173d;
+    --coral-glow: rgba(255, 71, 111, 0.2);
+    --coral-400: #ff6889;
+    --coral-500: #ff476f;
+    --orange: #ff6b35;
+
+    /* Soft Peach */
+    --peach: #fff1f4;
+    --peach-light: #fff8fa;
+    --peach-dark: #ffd8e1;
+    --peach-200: #fff1f4;
+    --peach-100: #fff8fa;
+
+    /* Warm Gold Accents */
+    --gold: #f59e0b;
+    --gold-light: #fbbf24;
+    --gold-dark: #d97706;
+    --gold-3d: #b45309;
+    --gold-glow: rgba(245, 158, 11, 0.25);
+    --amber-soft: #fef3c7;
+    --gold-400: #fbbf24;
+    --gold-300: #fcd34d;
+    --gold-500: #d97706;
+
+    /* Gameplay Indicators */
+    --emerald: #10b981;
+    --emerald-light: #34d399;
+    --emerald-dark: #059669;
+    --emerald-3d: #047857;
+    --emerald-glow: rgba(16, 185, 129, 0.25);
+    --emerald-400: #34d399;
+    --emerald-500: #10b981;
+
+    --crimson: #ef4444;
+    --crimson-light: #f87171;
+    --crimson-dark: #dc2626;
+    --crimson-3d: #991b1b;
+    --crimson-glow: rgba(239, 68, 68, 0.25);
+
+    /* Dark Plum Typography for Ultra-High Readability */
+    --text-white: #ffffff;
+    --text-cream: #1e1035;
+    --text-dark: #1e1035;
+    --text-subtle: #452c6b;
+    --text-muted: #6e5692;
+
+    /* Clean Borders & Dividers */
+    --border-subtle: #e8e0f4;
+    --border-medium: #d6c6ee;
+    --border-card: #e2d7f5;
+    --border-card-hover: #bda7e8;
+    --border-violet: #8c69d4;
+    --border-coral: #ff7596;
+    --border-gold: #f59e0b;
+    --border-emerald: #10b981;
+
+    /* Realistic Commercial Depth */
+    --shadow-sm: 0 2px 6px rgba(35, 16, 68, 0.05);
+    --shadow-card: 0 4px 14px rgba(35, 16, 68, 0.06), 0 1px 2px rgba(35, 16, 68, 0.04);
+    --shadow-elevated: 0 8px 20px rgba(35, 16, 68, 0.08), 0 2px 4px rgba(35, 16, 68, 0.04);
+    --shadow-lg: 0 12px 28px rgba(35, 16, 68, 0.1);
+
+    /* Tactile 3D Buttons */
+    --btn-shadow-primary: 0 3px 0 var(--primary-3d), 0 6px 14px rgba(76, 36, 159, 0.2);
+    --btn-shadow-coral: 0 3px 0 var(--coral-3d), 0 6px 14px rgba(255, 71, 111, 0.2);
+    --btn-shadow-gold: 0 3px 0 var(--gold-3d), 0 6px 14px rgba(245, 158, 11, 0.2);
+    --btn-shadow-subtle: 0 2px 0 #cfc3e8, 0 4px 10px rgba(0, 0, 0, 0.06);
+
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-pill: 9999px;
+    --radius-full: 9999px;
+
+    /* Easings */
+    --ease-game: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ===================================================================
+   RESET & FOUNDATIONS (CORRECT 100% ZOOM AT 16PX)
+   =================================================================== */
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 16px; /* Standard 16px base for normal 100% zoom */
+    height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: var(--bg-main);
+    background-image:
+        radial-gradient(circle 600px at 100% 0%, rgba(241, 236, 250, 0.7), transparent 70%),
+        radial-gradient(circle 500px at 0% 100%, rgba(255, 241, 244, 0.6), transparent 60%);
+    background-attachment: fixed;
+    color: var(--text-dark);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+/* Flex main content so footer sticks to bottom on short pages */
+main,
+.site-page-container,
+.game-page-wrap,
+.hero-section,
+.auth-portal-wrapper,
+.arena-main-wrap {
+    flex: 1 0 auto;
+}
+
+/* ===================================================================
+   TYPOGRAPHY (PROPORTIONED, NO OVERSIZED TEXT)
+   =================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Fredoka', sans-serif;
+    font-weight: 800;
+    color: var(--text-dark);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+}
+
+h1 {
+    font-size: clamp(2.4rem, 4vw, 3.25rem); /* 38px - 52px */
+}
+
+h2 {
+    font-size: clamp(1.5rem, 2.4vw, 2rem); /* 24px - 32px */
+}
+
+h3 {
+    font-size: clamp(1.2rem, 1.8vw, 1.45rem); /* 19px - 23px */
+}
+
+p {
+    color: var(--text-subtle);
+    font-size: clamp(0.95rem, 1.1vw, 1.05rem); /* 15.2px - 16.8px */
+    line-height: 1.6;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+    transition: all var(--ease-smooth) 0.16s;
+}
+
+/* ===================================================================
+   COMMERCIAL GAMING NAVBAR (COMPACT 52PX HEIGHT)
+   =================================================================== */
+
+.site-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background: var(--bg-nav);
+    border-bottom: 2px solid #230d52;
+    box-shadow: 0 2px 10px rgba(35, 16, 68, 0.12);
+}
+
+.navbar-inner {
+    width: calc(100% - 48px);
+    max-width: 1200px;
+    margin-inline: auto;
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.brand-emblem {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    text-decoration: none;
+}
+
+.emblem-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--coral), #ff6b35);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 0 var(--coral-3d);
+    color: #ffffff;
+    transition: transform var(--ease-bounce) 0.2s;
+}
+
+.brand-emblem:hover .emblem-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--coral), #ff6b35);
+    border: 1.5px solid rgba(255, 255, 255, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 0 var(--coral-3d);
+    color: #ffffff;
+    transition: transform var(--ease-bounce) 0.2s;
+}
+
+.emblem-title {
+    font-family: 'Outfit', 'Fredoka', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+
+.emblem-title span.sub {
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--gold-light);
+    margin-top: 2px;
+    text-transform: uppercase;
+}
+
+.nav-links-menu, .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    list-style: none;
+    flex-wrap: wrap;
+}
+
+.nav-link-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 9px 16px;
+    border-radius: var(--radius-pill);
+    color: #ded6f0;
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 700;
+    text-decoration: none;
+    transition: all var(--ease-smooth) 0.15s;
+}
+
+.nav-link-item:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.nav-link-item.active {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.nav-link-item.btn-logout {
+    color: #ffe3eb;
+    background: rgba(255, 71, 111, 0.2);
+    border: 1px solid rgba(255, 71, 111, 0.35);
+}
+
+.nav-link-item.btn-logout:hover {
+    background: var(--coral);
+    color: #ffffff;
+}
+
+/* ===================================================================
+   ARCADE BUTTONS (CLEAN, PROPORTIONED, CLICKABLE)
+   =================================================================== */
+
+.play-btn, .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 22px;
+    font-family: 'Fredoka', 'Outfit', sans-serif;
+    font-size: 0.9375rem; /* 15px */
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    border: none;
+    position: relative;
+    user-select: none;
+    transition: transform 0.12s var(--ease-smooth), box-shadow 0.12s var(--ease-smooth), background 0.12s var(--ease-smooth);
+    outline: none;
+}
+
+.play-btn:active, .btn:active {
+    transform: translateY(2px) !important;
+}
+
+/* Royal Purple Primary */
+.play-btn-primary, .btn-primary {
+    background: linear-gradient(180deg, var(--primary-light) 0%, var(--primary) 100%);
+    color: #ffffff;
+    box-shadow: var(--btn-shadow-primary);
+}
+
+.play-btn-primary:hover, .btn-primary:hover {
+    background: linear-gradient(180deg, #7440db 0%, var(--primary-light) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--primary-3d), 0 8px 16px rgba(76, 36, 159, 0.25);
+    color: #ffffff;
+}
+
+.play-btn-primary:active, .btn-primary:active {
+    box-shadow: 0 1px 0 var(--primary-3d) !important;
+}
+
+/* Coral Punch */
+.play-btn-coral, .btn-coral {
+    background: linear-gradient(180deg, var(--coral-light) 0%, var(--coral) 100%);
+    color: #ffffff;
+    box-shadow: var(--btn-shadow-coral);
+}
+
+.play-btn-coral:hover, .btn-coral:hover {
+    background: linear-gradient(180deg, #ff7a98 0%, var(--coral-light) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--coral-3d), 0 8px 16px rgba(255, 71, 111, 0.25);
+    color: #ffffff;
+}
+
+.play-btn-coral:active, .btn-coral:active {
+    box-shadow: 0 1px 0 var(--coral-3d) !important;
+}
+
+/* Gold Trophy */
+.play-btn-gold, .btn-gold {
+    background: linear-gradient(180deg, var(--gold-light) 0%, var(--gold) 100%);
+    color: #2b145a;
+    font-weight: 800;
+    box-shadow: var(--btn-shadow-gold);
+}
+
+.play-btn-gold:hover, .btn-gold:hover {
+    background: linear-gradient(180deg, #fcd34d 0%, var(--gold-light) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 var(--gold-3d), 0 8px 16px rgba(245, 158, 11, 0.25);
+    color: #2b145a;
+}
+
+.play-btn-gold:active, .btn-gold:active {
+    box-shadow: 0 1px 0 var(--gold-3d) !important;
+}
+
+/* Clean Secondary / Surface */
+.play-btn-glass, .btn-secondary {
+    background: #ffffff;
+    border: 1.5px solid var(--border-medium);
+    color: var(--primary);
+    box-shadow: var(--btn-shadow-subtle);
+}
+
+.play-btn-glass:hover, .btn-secondary:hover {
+    background: var(--bg-surface-elevated);
+    border-color: var(--border-violet);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 #cfc3e8, 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.play-btn-glass:active, .btn-secondary:active {
+    box-shadow: 0 1px 0 #cfc3e8 !important;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+/* ===================================================================
+   PREMIUM COMMERCIAL GAME CARDS
+   =================================================================== */
+
+.arena-card, .game-card, .table-card, .profile-card,
+.settings-card, .champion-card, .gaming-panel, .duel-room-card,
+.duel-stadium-card, .daily-table-card, .analytics-panel, .mp-table-card {
+    background: var(--bg-surface-card);
+    border: 1.5px solid var(--border-card);
+    border-radius: var(--radius-lg);
+    padding: clamp(16px, 2vw, 20px);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--ease-smooth) 0.18s, box-shadow var(--ease-smooth) 0.18s, border-color var(--ease-smooth) 0.18s;
+    position: relative;
+}
+
+.arena-card:hover, .game-card:hover, .gaming-panel:hover {
+    border-color: var(--border-card-hover);
+    box-shadow: var(--shadow-elevated);
+}
+
+/* ===================================================================
+   CONTAINERS (FLUID & BALANCED FOR 1366x768 TO 1920x1080)
+   =================================================================== */
+
+.site-page-container, .arena-container {
+    width: calc(100% - 48px);
+    max-width: 1200px;
+    margin-inline: auto;
+    padding: 24px 0 48px;
+}
+
+.site-page-narrow, .arena-container-narrow {
+    width: calc(100% - 48px);
+    max-width: 900px;
+    margin-inline: auto;
+}
+
+/* ===================================================================
+   SECTION HEADLINES (COMPACT PROPORTIONS)
+   =================================================================== */
+
+.section-headline-block, .arena-hero, .hero {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.section-headline-block h1, .arena-hero h1, .hero h1 {
+    font-size: clamp(1.35rem, 2.3vw, 1.85rem);
+    margin-bottom: 5px;
+    color: var(--text-dark);
+}
+
+.section-headline-block p, .arena-hero p, .hero p {
+    font-size: 0.875rem;
+    color: var(--text-subtle);
+    max-width: 540px;
+    margin: 0 auto;
+}
+
+/* ===================================================================
+   STAT CARDS (BALANCED COMPACT SIZING)
+   =================================================================== */
+
+.stats-grid, .arena-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.stat-card, .arena-stat-card {
+    background: #ffffff;
+    border: 1.5px solid var(--border-card);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before, .arena-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--coral), var(--primary), var(--gold));
+}
+
+.stat-card:hover, .arena-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+}
+
+.stat-icon {
+    font-size: 22px;
+    margin-bottom: 4px;
+    display: inline-block;
+}
+
+.stat-label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-family: 'Fredoka', 'Outfit', sans-serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    line-height: 1;
+}
+
+/* ===================================================================
+   PROGRESS BARS
+   =================================================================== */
+
+.progress-bar-wrapper, .xp-track-bar {
+    width: 100%;
+    height: 10px;
+    background: #e9e1f5;
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill, .xp-fill-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--coral), var(--primary), var(--gold));
+    border-radius: var(--radius-pill);
+    transition: width 0.5s ease;
+}
+
+/* ===================================================================
+   FORMS & INPUTS
+   =================================================================== */
+
+.form-group-item, .arena-form-group, .form-group, .auth-form-field {
+    margin-bottom: 13px;
+    text-align: left;
+}
+
+.form-label, .arena-label, .auth-form-field label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: var(--text-dark);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+.text-input-field, .arena-input, .auth-form-input, input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 9px 13px;
+    background: #ffffff;
+    border: 1.5px solid var(--border-card);
+    border-radius: var(--radius-md);
+    color: var(--text-dark);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    outline: none;
+    transition: all 0.16s ease;
+}
+
+.text-input-field:focus, .arena-input:focus, .auth-form-input:focus, input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--primary);
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(76, 36, 159, 0.12);
+}
+
+.text-input-field::placeholder, .arena-input::placeholder, .auth-form-input::placeholder {
+    color: #9f8cbd;
+}
+
+/* ===================================================================
+   PILLS & BADGES
+   =================================================================== */
+
+.game-pill, .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.game-pill-gold, .pill-gold {
+    background: var(--amber-soft);
+    border: 1px solid #fcd34d;
+    color: #92400e;
+}
+
+.game-pill-violet, .pill-violet {
+    background: #ede5f9;
+    border: 1px solid var(--border-violet);
+    color: var(--primary);
+}
+
+.game-pill-coral, .pill-coral {
+    background: var(--peach);
+    border: 1px solid var(--border-coral);
+    color: var(--coral-dark);
+}
+
+.game-pill-emerald, .pill-emerald {
+    background: #d1fae5;
+    border: 1px solid #6ee7b7;
+    color: #065f46;
+}
+
+/* ===================================================================
+   TACTILE VIRTUAL KEYBOARD (ERGONOMIC & COMPACT)
+   =================================================================== */
+
+.keyboard {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    max-width: 620px;
+    margin: 12px auto 0;
+}
+
+.keyboard-row {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    width: 100%;
+}
+
+.key {
+    width: clamp(38px, 4.2vw, 48px);
+    height: clamp(42px, 4.8vh, 48px);
+    background: #ffffff;
+    border: 1.5px solid #d4c5ee;
+    border-radius: var(--radius-sm);
+    color: var(--primary-dark);
+    font-family: 'Fredoka', 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2.5px 0 #cfc0ec, 0 3px 6px rgba(0, 0, 0, 0.04);
+    transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.1s ease;
+    user-select: none;
+    outline: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.key:hover:not(:disabled) {
+    background: var(--bg-surface-elevated);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 0 #bda6e8;
+}
+
+.key:active:not(:disabled) {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #cfc0ec;
+}
+
+.key:disabled {
+    background: #f1ecf7;
+    border-color: #e4d8f2;
+    color: #a494be;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.key.correct {
+    background: #10b981 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+    box-shadow: 0 2.5px 0 #047857 !important;
+}
+
+.key.wrong {
+    background: #f87171 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    opacity: 0.45 !important;
+    text-decoration: line-through;
+}
+
+@media (max-width: 600px) {
+    .key {
+        width: 28px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+    .keyboard-row {
+        gap: 3px;
+    }
+}
+
+/* ===================================================================
+   FLASH MESSAGES / TOAST ALERTS
+   =================================================================== */
+
+.flash-messages-wrap {
+    margin-bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.flash-banner {
+    background: #fff1f4;
+    border: 1.5px solid #ff8aa3;
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    color: #9f1239;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 6px rgba(159, 18, 57, 0.06);
+}
+
+/* ===================================================================
+   COMMERCIAL GAMING FOOTER
+   =================================================================== */
+
+.site-footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    width: 100%;
+    background: #25124e;
+    color: #ded6f0;
+    border-top: 3px solid #ff476f;
+    padding: 24px 0 20px;
+}
+
+.footer-inner {
+    width: calc(100% - 48px);
+    max-width: 1200px;
+    margin-inline: auto;
+}
+
+.footer-main-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.footer-brand h3 {
+    font-size: 1.15rem;
+    color: #ffffff;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.footer-brand p {
+    font-size: 0.8125rem;
+    color: #c4b5de;
+    line-height: 1.5;
+    max-width: 280px;
+}
+
+.footer-col h4 {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-bottom: 10px;
+}
+
+.footer-links-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.footer-links-list a {
+    color: #ded6f0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+.footer-links-list a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.footer-bottom-bar {
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: #bda7dc;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 860px) {
+    .footer-main-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 540px) {
+    .footer-main-grid {
+        grid-template-columns: 1fr;
+    }
+    .footer-bottom-bar {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* ===================================================================
+   TEXT UTILITIES
+   =================================================================== */
+
+.text-violet  { color: var(--primary) !important; }
+.text-coral   { color: var(--coral-dark) !important; }
+.text-gold    { color: #b45309 !important; }
+.text-emerald { color: #047857 !important; }
+.text-muted   { color: var(--text-muted) !important; }
