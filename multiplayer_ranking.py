@@ -11,60 +11,6 @@ multiplayer_ranking_bp = Blueprint(
 
 
 # =======================================
-# ENSURE MULTIPLAYER TABLE EXISTS
-# =======================================
-
-@multiplayer_ranking_bp.before_request
-def initialize_ranking_database():
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS multiplayer_rooms (
-
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-
-            room_code TEXT UNIQUE NOT NULL,
-
-            host_id INTEGER NOT NULL,
-
-            guest_id INTEGER,
-
-            word TEXT NOT NULL,
-
-            guessed_letters TEXT DEFAULT '',
-
-            wrong INTEGER DEFAULT 0,
-
-            max_attempts INTEGER DEFAULT 6,
-
-            status TEXT DEFAULT 'waiting',
-
-            turn_player_id INTEGER,
-
-            last_guess TEXT,
-
-            last_guess_player_id INTEGER,
-
-            last_guess_correct INTEGER,
-
-            winner_id INTEGER,
-
-            xp_reward INTEGER DEFAULT 150,
-
-            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-
-            updated_at TEXT DEFAULT CURRENT_TIMESTAMP
-
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-
-# =======================================
 # LOGIN REQUIRED
 # =======================================
 
@@ -94,121 +40,131 @@ def leaderboard():
     conn = get_connection()
     cursor = conn.cursor()
 
-    # Player rankings
+    try:
 
-    cursor.execute(
-        """
-        SELECT
-            p.id AS player_id,
-            p.username,
-            p.level,
-            p.xp,
+        # Player rankings
+        cursor.execute(
+            """
+            SELECT
+                p.id AS player_id,
+                p.username,
+                p.level,
+                p.xp,
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN r.status = 'completed'
-                         AND r.winner_id = p.id
-                        THEN 1
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS multiplayer_wins,
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN r.status = 'completed'
+                             AND r.winner_id = p.id
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS multiplayer_wins,
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN r.status = 'completed'
-                         AND r.winner_id = p.id
-                        THEN r.xp_reward
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS multiplayer_xp,
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN r.status = 'completed'
+                             AND r.winner_id = p.id
+                            THEN r.xp_reward
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS multiplayer_xp,
 
-            COALESCE(
-                SUM(
-                    CASE
-                        WHEN r.status = 'completed'
-                         AND (
-                             r.host_id = p.id
-                             OR r.guest_id = p.id
-                         )
-                        THEN 1
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS matches_played
+                COALESCE(
+                    SUM(
+                        CASE
+                            WHEN r.status = 'completed'
+                             AND (
+                                 r.host_id = p.id
+                                 OR r.guest_id = p.id
+                             )
+                            THEN 1
+                            ELSE 0
+                        END
+                    ),
+                    0
+                ) AS matches_played
 
-        FROM players p
+            FROM players p
 
-        LEFT JOIN multiplayer_rooms r
+            LEFT JOIN multiplayer_rooms r
+                ON (
+                    r.host_id = p.id
+                    OR r.guest_id = p.id
+                )
 
-            ON (
-                r.host_id = p.id
-                OR r.guest_id = p.id
-            )
+            GROUP BY
+                p.id,
+                p.username,
+                p.level,
+                p.xp
 
-        GROUP BY
-            p.id,
-            p.username,
-            p.level,
-            p.xp
+            HAVING SUM(
+                CASE
+                    WHEN r.status = 'completed'
+                     AND (
+                         r.host_id = p.id
+                         OR r.guest_id = p.id
+                     )
+                    THEN 1
+                    ELSE 0
+                END
+            ) > 0
 
-        HAVING matches_played > 0
+            ORDER BY
+                multiplayer_wins DESC,
+                multiplayer_xp DESC,
+                p.xp DESC,
+                p.id ASC
 
-        ORDER BY
-            multiplayer_wins DESC,
-            multiplayer_xp DESC,
-            p.xp DESC,
-            p.id ASC
-
-        LIMIT 50
-        """
-    )
-
-    players = cursor.fetchall()
-
-    # Overall completed multiplayer matches
-
-    cursor.execute(
-        """
-        SELECT COUNT(*)
-        FROM multiplayer_rooms
-        WHERE status = 'completed'
-          AND winner_id IS NOT NULL
-        """
-    )
-
-    total_matches = cursor.fetchone()[0]
-
-    # Calculate total registered participants in completed matches
-
-    cursor.execute(
-        """
-        SELECT COUNT(*)
-        FROM players p
-
-        WHERE EXISTS (
-            SELECT 1
-            FROM multiplayer_rooms r
-
-            WHERE r.status = 'completed'
-              AND (
-                  r.host_id = p.id
-                  OR r.guest_id = p.id
-              )
+            LIMIT 50
+            """
         )
-        """
-    )
 
-    total_players = cursor.fetchone()[0]
+        players = cursor.fetchall()
 
-    conn.close()
+        # Overall completed matches
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM multiplayer_rooms
+            WHERE status = 'completed'
+              AND winner_id IS NOT NULL
+            """
+        )
 
+        total_matches = cursor.fetchone()[0]
+
+        # Total participating players
+        cursor.execute(
+            """
+            SELECT COUNT(*)
+            FROM players p
+
+            WHERE EXISTS (
+                SELECT 1
+                FROM multiplayer_rooms r
+
+                WHERE r.status = 'completed'
+                  AND (
+                      r.host_id = p.id
+                      OR r.guest_id = p.id
+                  )
+            )
+            """
+        )
+
+        total_players = cursor.fetchone()[0]
+
+    finally:
+        conn.close()
+
+    # Current player's statistics
     current_player_rank = None
     current_player_wins = 0
     current_player_xp = 0
@@ -226,8 +182,7 @@ def leaderboard():
 
             current_player_matches = player["matches_played"]
 
-    # Determine highest winner's score
-
+    # Top player's wins
     top_wins = 0
 
     if players:

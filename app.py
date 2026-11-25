@@ -2,7 +2,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from database import get_connection, initialize_database
+from database import get_connection, initialize_database, IntegrityError
 from pathlib import Path
 from datetime import date, timedelta
 import random
@@ -317,7 +317,7 @@ def register():
 
             return redirect(url_for("login"))
 
-        except sqlite3.IntegrityError:
+        except IntegrityError:
 
             flash("Username already exists!")
 
